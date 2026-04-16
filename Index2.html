@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>GiftHealth Pod Schedule</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;font-family:'Segoe UI',sans-serif;background:#f3f0fa;font-size:11px}
+
+/* ── NAV ── */
+.top-nav{height:44px;background:linear-gradient(135deg,#5b21b6,#7c3aed,#a855f7);display:flex;align-items:center;padding:0 10px;border-bottom:2px solid #c084fc;flex-shrink:0}
+.top-nav h1{color:#fff;font-size:.82rem;font-weight:900;letter-spacing:2px;white-space:nowrap;padding-right:12px;border-right:1px solid rgba(255,255,255,.3);margin-right:6px}
+.nav-tabs{display:flex;gap:0}
+.nav-tab{padding:0 12px;height:44px;display:flex;align-items:center;color:rgba(255,255,255,.75);font-size:.67rem;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s;letter-spacing:.5px;text-transform:uppercase}
+.nav-tab:hover{color:#fff;background:rgba(255,255,255,.1)}
+.nav-tab.active{color:#fff;border-bottom-color:#fff;background:rgba(255,255,255,.12)}
+.top-nav-brand{margin-left:auto;display:flex;align-items:center;gap:8px;padding-left:10px;border-left:1px solid rgba(255,255,255,.25)}
+.top-nav-brand .bname{color:#fff;font-size:.72rem;font-weight:800;line-height:1.2}
+.top-nav-brand .bsub{color:rgba(255,255,255,.7);font-size:.58rem}
+
+/* ── SUB BARS ── */
+.sub-bar{height:34px;display:flex;background:#ede9fe;gap:3px;padding:4px 10px;align-items:center;border-bottom:1px solid #c4b5fd;flex-shrink:0;overflow-x:auto}
+.sub-tab{padding:2px 10px;border-radius:20px;font-size:.63rem;font-weight:700;cursor:pointer;color:#6d28d9;border:1px solid #c4b5fd;background:#fff;white-space:nowrap;transition:.15s}
+.sub-tab:hover{background:#ddd6fe}
+.sub-tab.active{background:#7c3aed;color:#fff;border-color:#7c3aed}
+.sub-bar-label{color:#8b5cf6;font-size:.62rem;font-weight:700;letter-spacing:1px;margin-right:3px;white-space:nowrap}
+
+/* ── TOOLBAR ── */
+.toolbar{height:32px;display:flex;gap:6px;padding:4px 10px;background:#f5f3ff;align-items:center;border-bottom:1px solid #ddd6fe;flex-shrink:0}
+.tb-btn{padding:3px 11px;border-radius:12px;border:none;font-size:.63rem;font-weight:700;cursor:pointer}
+.btn-rand{background:#7c3aed;color:#fff}
+.btn-clear{background:#fee2e2;color:#991b1b}
+.tb-hint{color:#8b5cf6;font-size:.58rem;margin-left:auto}
+
+/* ── PAGES ── */
+.staff-page{display:none;flex-direction:column;height:calc(100vh - 44px);overflow:hidden}
+.staff-page.active{display:flex}
+.staff-page-body{flex:1;overflow-y:auto;padding:12px}
+.sched-wrap{display:none;flex-direction:column;height:calc(100vh - 44px)}
+.sched-wrap.active{display:flex}
+
+/* ── SCHEDULE BODY ── */
+.sched-body{flex:1;display:flex;gap:0;min-height:0;overflow:hidden}
+.main-area{flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 10px}
+.sidebar{width:190px;flex-shrink:0;overflow-y:auto;padding:6px;border-left:1px solid #ddd6fe;background:#faf9ff;display:flex;flex-direction:column;gap:6px}
+
+/* ── SECTION HEADER ── */
+.section-hdr{background:linear-gradient(90deg,#7c3aed,#a855f7);color:#fff;font-size:.6rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:5px 10px;margin:16px 0 8px;border-radius:5px;box-shadow:0 1px 4px rgba(124,58,237,.2);display:flex;align-items:center;gap:6px}
+.section-hdr:first-child{margin-top:4px}
+
+/* ── POD GROUPS ── */
+.pod-group{display:flex;gap:12px;margin-bottom:6px;flex-wrap:wrap}
+.pod-col{display:flex;flex-direction:column;gap:8px;flex:1;min-width:240px}
+
+/* ── POD CARD ── */
+.pod-card{background:#fff;border:1px solid #c4b5fd;border-radius:6px;overflow:hidden;box-shadow:0 1px 5px rgba(109,40,217,.08)}
+.pod-col-header-row{display:grid;background:linear-gradient(90deg,#7c3aed,#9333ea)}
+.pod-ch{color:#fff;font-size:.58rem;font-weight:700;text-align:center;padding:3px 3px;border-right:1px solid rgba(255,255,255,.2)}
+.pod-ch:last-child{border-right:none}
+.pod-name-row{display:grid}
+.pod-name-row.top-row{background:#fff}
+.pod-name-row.bot-row{background:#f5f3ff}
+.pod-nc{padding:3px 3px;text-align:center;border-right:1px solid #ede9fe;font-size:.65rem;display:flex;align-items:center;justify-content:center;min-height:22px}
+.pod-nc:last-child{border-right:none}
+.pod-info-row{display:grid;background:#ede9fe;border-top:1px solid #ddd6fe;border-bottom:1px solid #ddd6fe}
+.pod-info-cell{padding:2px 5px;font-size:.62rem;font-weight:800;color:#4c1d95;text-align:center;border-right:1px solid #ddd6fe;display:flex;align-items:center;justify-content:center}
+.pod-info-cell:last-child{border-right:none}
+
+/* ── DRUG BAR ── */
+.pod-drug-bar{display:flex;align-items:center;gap:4px;padding:2px 6px;background:#312e81;border-bottom:1px solid #4f46e5;min-height:20px}
+.drug-sel{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#e0e7ff;border-radius:8px;padding:1px 4px;font-size:.58rem;font-weight:700;cursor:pointer;flex:1;min-width:60px}
+.drug-sel option{background:#312e81;color:#e0e7ff}
+.ot-toggle{padding:1px 6px;border-radius:8px;border:1px solid rgba(255,255,255,.3);font-size:.55rem;font-weight:800;cursor:pointer;white-space:nowrap}
+.ot-on{background:#dc2626;color:#fee2e2}
+.ot-off{background:rgba(255,255,255,.15);color:#c7d2fe}
+
+/* ── LEAD BAR ── */
+.pod-lead-bar{display:flex;align-items:center;gap:4px;padding:2px 6px;background:#15803d;color:#dcfce7;border-bottom:1px solid #86efac;min-height:20px}
+.pod-lead-name{flex:1;font-weight:800;font-size:.6rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pod-lead-empty{color:rgba(255,255,255,.6);font-style:italic;font-size:.58rem;flex:1}
+.pod-lead-btn{background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.4);color:#dcfce7;border-radius:8px;padding:1px 5px;font-size:.55rem;cursor:pointer;font-weight:700;white-space:nowrap}
+
+/* ── POD TITLE BAR ── */
+.pod-title-bar{background:#6b21a8;display:flex;align-items:center;justify-content:space-between;padding:2px 6px;border-bottom:1px solid #8b5cf6}
+.pod-id{color:#fff;font-weight:900;font-size:.7rem}
+.pod-time-sel{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:8px;padding:1px 4px;font-size:.58rem;font-weight:700;cursor:pointer}
+.pod-time-sel option{background:#3b0764;color:#fff}
+
+/* ── SLOT ── */
+.slot{display:inline-block;padding:2px 4px;border-radius:3px;font-size:.62rem;font-weight:700;cursor:pointer;border:1px solid transparent;transition:.1s;white-space:nowrap;text-align:center;min-width:40px;position:relative}
+.slot:hover{filter:brightness(1.1);transform:scale(1.04)}
+.slot.empty-slot{background:#f5f3ff;color:#8b5cf6;border:1px dashed #c4b5fd;font-style:italic;font-size:.55rem}
+.slot.empty-slot:hover{background:#ede9fe;color:#6d28d9}
+.accom-dot{position:absolute;top:-2px;right:-2px;width:6px;height:6px;border-radius:50%;background:#f59e0b;border:1px solid #fff}
+
+/* ── RO TABLE ── */
+.ro-table{border-collapse:collapse;background:#fff;margin-bottom:6px;border-radius:6px;overflow:hidden;border:1px solid #ddd6fe}
+.ro-table th{background:#14532d;color:#fff;padding:3px 6px;font-size:.58rem;font-weight:700;text-align:center}
+.ro-table td{border:1px solid #ddd;padding:2px 5px;text-align:center;vertical-align:middle}
+
+/* ── SIDEBAR ── */
+.sb-block{border-radius:6px;overflow:hidden;border:1px solid #ddd6fe;background:#fff;box-shadow:0 1px 3px rgba(109,40,217,.06)}
+.sb-head{background:linear-gradient(90deg,#7c3aed,#9333ea);color:#fff;font-size:.58rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 7px}
+.sb-body{padding:4px 6px}
+.sb-chip-row{display:flex;flex-wrap:wrap;gap:2px;padding:3px 5px;min-height:22px}
+.sb-item{padding:2px 0;border-bottom:1px solid #f0e8ff;font-size:.63rem;color:#4c1d95;display:flex;justify-content:space-between;align-items:center;gap:3px}
+.sb-item:last-child{border-bottom:none}
+.sb-empty{color:#a78bfa;font-style:italic;font-size:.6rem;padding:2px 0}
+.out-chip{display:inline-flex;align-items:center;gap:2px;padding:1px 5px;border-radius:10px;font-size:.56rem;font-weight:700;margin:1px}
+
+/* ── STATUS BADGES ── */
+.sp-active{background:#dcfce7;color:#166534}.sp-pto{background:#dbeafe;color:#1e40af}
+.sp-off{background:#fef9c3;color:#854d0e}.sp-ncns{background:#fee2e2;color:#991b1b}
+.sp-late{background:#ffedd5;color:#9a3412}.sp-med{background:#fce7f3;color:#9d174d}
+.sp-sus{background:#f4f4f5;color:#52525b}
+
+/* ── NOTES TABLE ── */
+.note-table{width:100%;border-collapse:collapse;font-size:.58rem}
+.note-table th{background:#ede9fe;color:#5b21b6;padding:2px 3px;font-weight:700;border:1px solid #ddd}
+.note-table td{border:1px solid #eee;padding:1px 2px}
+.ni{width:100%;border:none;background:transparent;font-size:.58rem;color:#3b0764;font-family:inherit}
+
+/* ── STAFF / ATTEND TABLE ── */
+.staff-toolbar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.staff-toolbar h2{color:#3b0764;font-size:.9rem;font-weight:800;flex:1}
+.btn-add{background:#7c3aed;color:#fff;border:none;border-radius:7px;padding:5px 14px;font-size:.7rem;font-weight:700;cursor:pointer}
+.search-box{border:1px solid #c4b5fd;border-radius:7px;padding:4px 9px;font-size:.7rem;color:#3b0764;width:160px}
+.filter-sel{border:1px solid #c4b5fd;border-radius:7px;padding:4px 7px;font-size:.67rem;color:#3b0764;background:#fff}
+.staff-table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 8px rgba(0,0,0,.08)}
+.staff-table th{background:#5b21b6;color:#fff;padding:6px 8px;font-size:.63rem;font-weight:700;text-align:left;white-space:nowrap}
+.staff-table td{padding:5px 8px;border-bottom:1px solid #f0e8ff;font-size:.67rem;vertical-align:middle}
+.staff-table tr:hover td{background:#faf5ff}
+.badge{display:inline-block;padding:1px 6px;border-radius:8px;font-size:.58rem;font-weight:700;margin:1px}
+.b-rph{background:#ede9fe;color:#5b21b6}.b-ship{background:#dbeafe;color:#1e40af}
+.b-qa{background:#d1fae5;color:#065f46}.b-pack{background:#ffedd5;color:#7c2d12}
+.b-label{background:#fefce8;color:#713f12}.b-over{background:#cffafe;color:#164e63}
+.b-lead{background:#dcfce7;color:#166534}.b-pos{background:#f4f4f5;color:#374151}
+.b-tech{background:#dbeafe;color:#1e3a8a}.b-ro{background:#fce7f3;color:#831843}
+.b-suite{background:#7c3aed;color:#fff}.b-b2{background:#1e40af;color:#fff}.b-ro-s{background:#14532d;color:#fff}
+.b-accom{background:#fef3c7;color:#92400e}
+
+/* ── SUMMARY CARDS ── */
+.summary-card{background:#fff;border-radius:8px;padding:8px 14px;border:1px solid #c4b5fd;min-width:90px;text-align:center}
+.sc-num{font-size:1.4rem;font-weight:900;line-height:1}
+.sc-lbl{font-size:.58rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.sc-pto{border-color:#93c5fd;color:#1e40af}.sc-off{border-color:#fcd34d;color:#854d0e}
+.sc-ncns{border-color:#fca5a5;color:#991b1b}.sc-late{border-color:#fdba74;color:#9a3412}
+.sc-med{border-color:#f9a8d4;color:#9d174d}.sc-sus{border-color:#a1a1aa;color:#52525b}
+.sc-total{border-color:#7c3aed;color:#5b21b6}
+.att-notes-block{background:#fff;border-radius:6px;border:1px solid #c4b5fd;overflow:hidden;margin-bottom:6px}
+.att-notes-hdr{background:#5b21b6;color:#fff;padding:4px 8px;font-size:.63rem;font-weight:800}
+.att-log-row{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;border-bottom:1px solid #f0e8ff;font-size:.67rem}
+.att-empty{color:#c4b5fd;font-style:italic;font-size:.65rem;padding:6px 8px}
+
+/* ── DROPDOWN ── */
+.drop{position:fixed;background:#1e0a40;border:1px solid #7c3aed;border-radius:8px;padding:5px;z-index:999;min-width:155px;max-width:205px;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+.drop h4{color:#c4b5fd;font-size:.6rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;padding-bottom:2px;border-bottom:1px solid #3b1070}
+.di{padding:3px 6px;border-radius:4px;font-size:.65rem;color:#e9d5ff;cursor:pointer;display:flex;align-items:center;gap:4px;font-weight:600}
+.di:hover{background:rgba(124,58,237,.3)}
+.di.cur{background:rgba(124,58,237,.2)}
+.di.doff{color:#fca5a5}.di.doff:hover{background:rgba(127,29,29,.4)}
+.di.drem{color:#a1a1aa}.di.drem:hover{background:rgba(39,39,42,.5)}
+.dsep{border:none;border-top:1px solid #3b1070;margin:2px 0}
+.dcat{font-size:.55rem;color:#a78bfa;font-weight:700;padding:1px 4px;letter-spacing:1px}
+.dscroll{max-height:120px;overflow-y:auto}
+.ddot{width:6px;height:6px;border-radius:2px;flex-shrink:0}
+
+/* ── MODAL ── */
+.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:center;justify-content:center}
+.mbg.open{display:flex}
+.modal{background:#1e0a40;border:1px solid #7c3aed;border-radius:12px;padding:18px;width:90%;max-width:540px;max-height:88vh;overflow-y:auto}
+.modal h2{color:#c4b5fd;font-size:.82rem;font-weight:800;letter-spacing:2px;margin-bottom:10px;text-transform:uppercase}
+.ml{font-size:.65rem;color:#a78bfa;display:block;margin-bottom:2px;margin-top:7px;font-weight:600}
+.mi{width:100%;background:#2d1060;border:1px solid #5b21b6;border-radius:5px;padding:5px 8px;color:#e9d5ff;font-size:.72rem}
+.mi:focus{outline:none;border-color:#a78bfa}
+.mrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pb-wrap{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px}
+.pb{padding:2px 9px;border-radius:9px;border:1px solid #5b21b6;background:transparent;color:#c4b5fd;font-size:.6rem;cursor:pointer;font-weight:600}
+.pb.on{background:#7c3aed;border-color:#7c3aed;color:#fff}
+.sb2{padding:2px 9px;border-radius:9px;border:1px solid #5b21b6;background:transparent;color:#c4b5fd;font-size:.6rem;cursor:pointer;font-weight:600;margin:2px}
+.sb2.on{background:#7c3aed;border-color:#7c3aed;color:#fff}
+.accom-box{background:#2d1060;border:1px solid #5b21b6;border-radius:5px;padding:6px;margin-top:3px}
+.accom-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.accom-row label{font-size:.65rem;color:#e9d5ff;cursor:pointer;display:flex;align-items:center;gap:3px}
+.ma{display:flex;gap:6px;margin-top:12px}
+.msave{flex:1;background:#7c3aed;color:#fff;border:none;border-radius:5px;padding:6px;font-weight:700;cursor:pointer;font-size:.7rem}
+.mcan{background:transparent;border:1px solid #5b21b6;color:#c4b5fd;border-radius:5px;padding:6px 10px;cursor:pointer;font-size:.7rem}
+.mdel{background:#450a0a;border:none;color:#fca5a5;border-radius:5px;padding:6px 10px;cursor:pointer;font-size:.7rem}
+.erow{display:flex;align-items:center;justify-content:space-between;padding:4px 3px;border-bottom:1px solid rgba(255,255,255,.07);cursor:pointer;border-radius:4px}
+.erow:hover{background:rgba(124,58,237,.12)}
+.en{font-size:.7rem;font-weight:700;color:#e9d5ff}
+.es{font-size:.56rem;color:#a78bfa;margin-top:1px}
+.addbtn{width:100%;background:rgba(124,58,237,.15);border:1px dashed #7c3aed;color:#c4b5fd;border-radius:5px;padding:5px;font-size:.67rem;cursor:pointer;margin-top:6px;font-weight:600}
+
+footer{text-align:center;color:#8b5cf6;font-size:.58rem;padding:6px;border-top:1px solid #ddd6fe;background:#f5f3ff;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="top-nav">
+  <h1>🏭 POD SCHEDULE</h1>
+  <div class="nav-tabs">
+    <div class="nav-tab active" id="navStaff"  onclick="switchMain('staff')">👥 Staff</div>
+    <div class="nav-tab"        id="navSched"   onclick="switchMain('sched')">📋 Schedule</div>
+    <div class="nav-tab"        id="navAttend"  onclick="switchMain('attend')">🚨 Attendance</div>
+  </div>
+  <div class="top-nav-brand">
+    <div>
+      <div class="bname">gifthealth<sup style="font-size:.5rem">∞</sup></div>
+      <div class="bsub">Created by Dom</div>
+    </div>
+    <button onclick="toggleFS()" id="fsBtn" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:8px;padding:3px 10px;font-size:.65rem;font-weight:700;cursor:pointer;margin-left:8px">⛶ Fullscreen</button>
+  </div>
+</div>
+
+<!-- STAFF PAGE -->
+<div class="staff-page active" id="staffPage">
+  <div class="staff-page-body">
+    <div class="staff-toolbar">
+      <h2>👥 Staff Directory</h2>
+      <input class="search-box" id="staffSearch" placeholder="🔍 Search name..." oninput="renderStaffTable()"/>
+      <select class="filter-sel" id="filterSuite" onchange="renderStaffTable()">
+        <option value="All">All Suites</option>
+        <option>Suite B1</option><option>Suite B2</option><option>Suite C – RO</option>
+      </select>
+      <select class="filter-sel" id="filterStatus" onchange="renderStaffTable()">
+        <option value="All">All Statuses</option>
+        <option>Active</option><option>PTO</option><option>Time Off</option>
+        <option>NCNS</option><option>Late</option><option>Medical</option><option>Suspended</option>
+      </select>
+      <button class="btn-add" onclick="openEmpModal(null)">+ Add Employee</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="staff-table">
+        <thead><tr>
+          <th>Name</th><th>Suite</th><th>Shift</th><th>Work Days</th>
+          <th>Eligible Positions</th><th>Accommodation</th><th>Status</th><th>Notes</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="staffBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ATTENDANCE PAGE -->
+<div class="staff-page" id="attendPage">
+  <div class="staff-page-body">
+    <div class="staff-toolbar">
+      <h2>🚨 Attendance & Call-Offs</h2>
+      <select class="filter-sel" id="attendDay" onchange="renderAttendance()">
+        <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+        <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+      </select>
+      <select class="filter-sel" id="attendSuite" onchange="renderAttendance()">
+        <option value="All">All Suites</option>
+        <option>Suite B1</option><option>Suite B2</option><option>Suite C – RO</option>
+      </select>
+      <select class="filter-sel" id="attendFilter" onchange="renderAttendance()">
+        <option value="All">All Statuses</option>
+        <option>PTO</option><option>Time Off</option><option>NCNS</option>
+        <option>Late</option><option>Left Early</option><option>Medical</option><option>Suspended</option>
+      </select>
+      <button class="btn-add" onclick="openQuickCallOff()">+ Log Call-Off</button>
+    </div>
+    <div id="attendSummary" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
+    <div style="overflow-x:auto">
+      <table class="staff-table">
+        <thead><tr>
+          <th>Employee</th><th>Suite</th><th>Day</th><th>Status</th>
+          <th>C/O Info</th><th>Noted By</th><th>Time</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="attendBody"></tbody>
+      </table>
+    </div>
+    <div id="notesGrid" style="margin-top:14px"></div>
+  </div>
+</div>
+
+<!-- SCHEDULE PAGE -->
+<div class="sched-wrap" id="schedPage">
+  <div class="sub-bar" id="suiteTabs"><span class="sub-bar-label">SUITE:</span></div>
+  <div class="sub-bar" id="dayTabs"><span class="sub-bar-label">DAY:</span></div>
+  <div class="toolbar">
+    <button class="tb-btn btn-rand" onclick="randomizeSuite()">🔀 Auto-Assign</button>
+    <button class="tb-btn btn-clear" onclick="clearSuite()">🗑 Clear</button>
+    <span class="tb-hint">💡 Click any slot to assign / call-off &nbsp;|&nbsp; 🟡 = accommodation</span>
+  </div>
+  <div class="sched-body">
+    <div class="main-area" id="mainArea"></div>
+    <div class="sidebar" id="sidebar"></div>
+  </div>
+  <footer>gifthealth Pod Schedule &nbsp;·&nbsp; Created by Dom &nbsp;·&nbsp; Internal Use Only</footer>
+</div>
+
+<div class="drop" id="dropEl" style="display:none"></div>
+<div class="mbg" id="mbg"><div class="modal"><h2 id="mTitle"></h2><div id="mBody"></div></div></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════
+const DAYS      = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const SUITES    = ["Suite B1","Suite B2","Suite C – RO"];
+const STATUS_OPTS = ["Active","PTO","Time Off","NCNS","Late","Left Early","Medical","Suspended"];
+const SHIFT_OPTS  = ["6-2","8-4","10-6","Custom"];
+const WORK_DAYS   = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const ACCOM_TYPES = ["Seated Position","Limited Standing","No Heavy Lifting","Frequent Breaks","Ergonomic Equipment","Light Duty","Other"];
+const TIME_OPTS   = ["6a","8a","10a"];
+const ALL_POS     = ["Production Lead","RPH","Shipping","QA","Packing","Labeling","Runner","Auxiliary","RO Lead","Overflow 6am","Overflow 8-4"];
+const DUAL_COLS   = ["RPH","Shipping","QA","Packing"];
+const PACK_COLS   = ["QA","Packing"];
+
+// ═══════════════════════════════════════════════════
+// POD DEFINITIONS
+// ═══════════════════════════════════════════════════
+const B1_PODS = [
+  {id:"B31",time:"10a",lunch:"1:30 lunch"},{id:"B32",time:"10a",lunch:"1:30 lunch"},
+  {id:"B33",time:"10a",lunch:"1:30 lunch"},{id:"B34",time:"10a",lunch:"1:30 lunch"},
+  {id:"B35",time:"8a",lunch:"1pm lunch"}, {id:"B36",time:"8a",lunch:"1pm lunch"},
+  {id:"B37",time:"8a",lunch:"1pm lunch"}, {id:"B38",time:"8a",lunch:"1pm lunch"},
+];
+const B1_GROUPS = [
+  {label:"Back Row B31–B34",  left:["B31","B32"], right:["B33","B34"]},
+  {label:"Front Row B35–B38", left:["B35","B36"], right:["B37","B38"]},
+];
+const B2_PODS = [
+  {id:"B1", time:"8a",lunch:"12:00 lunch"},{id:"B2", time:"8a",lunch:"12:00 lunch"},
+  {id:"B3", time:"8a",lunch:"12:00 lunch"},{id:"B4", time:"8a",lunch:"12:00 lunch"},
+  {id:"B5", time:"8a",lunch:"12:00 lunch"},{id:"B6", time:"8a",lunch:"12:00 lunch"},
+  {id:"B7", time:"8a",lunch:"12:00 lunch"},{id:"B8", time:"8a",lunch:"12:00 lunch"},
+  {id:"B9", time:"8a",lunch:"12:00 lunch"},{id:"B10",time:"8a",lunch:"12:00 lunch"},
+  {id:"B11",time:"8a",lunch:"12:00 lunch"},{id:"B12",time:"8a",lunch:"12:00 lunch"},
+];
+const B2_GROUPS = [
+  {label:"B1 · B4 · B7 · B10", pods:["B1","B4","B7","B10"]},
+  {label:"B2 · B5 · B8 · B11", pods:["B2","B5","B8","B11"]},
+  {label:"B3 · B6 · B9 · B12", pods:["B3","B6","B9","B12"]},
+];
+const C_RPH = [
+  {id:"RPH1",start:"6:00 AM",lunch:"11:30 lunch"},{id:"RPH2",start:"6:00 AM",lunch:"11:30 lunch"},
+  {id:"RPH3",start:"8:00 AM",lunch:"12:30 lunch"},{id:"RPH4",start:"8:00 AM",lunch:"12:30 lunch"},
+];
+const C_PACKING  = [{id:"C5",start:"8:00 AM",lunch:"12:30 lunch"},{id:"C6",start:"8:00 AM",lunch:"12:30 lunch"},{id:"C7",start:"8:00 AM",lunch:"12:30 lunch"},{id:"C8",start:"8:00 AM",lunch:"12:30 lunch"},{id:"C9",start:"6:00 AM",lunch:"11:30 lunch"},{id:"C10",start:"6:00 AM",lunch:"11:30 lunch"},{id:"C11",start:"8:00 AM",lunch:"12pm lunch"},{id:"C12",start:"8:00 AM",lunch:"12pm lunch"}];
+const C_OVERFLOW = [{id:"C1",lunch:"11:30 lunch"},{id:"C2",lunch:"11:30 lunch"},{id:"C3",lunch:"12pm lunch"},{id:"C4",lunch:"12pm lunch"}];
+
+// ═══════════════════════════════════════════════════
+// EMPLOYEES
+// ═══════════════════════════════════════════════════
+let EMPS = [
+  {id:1,name:"Rima",suite:"Suite B1",shift:"10-6",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"10:00 AM",eligible:["Production Lead","RPH"],status:"Active",accom:[],accomNote:"",notes:"B31 Lead"},
+  {id:2,name:"Shaquille",suite:"Suite B1",shift:"10-6",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"10:00 AM",eligible:["Shipping","QA","Packing"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:3,name:"Maria",suite:"Suite B1",shift:"10-6",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"10:00 AM",eligible:["QA","Packing"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:4,name:"Toriauanna",suite:"Suite B1",shift:"10-6",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"10:00 AM",eligible:["Shipping","QA","Packing"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:5,name:"Sean",suite:"Suite B1",shift:"10-6",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"10:00 AM",eligible:["Shipping","QA"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:6,name:"Addisyn",suite:"Suite B1",shift:"10-6",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"10:00 AM",eligible:["QA","Packing"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:7,name:"Michelle",suite:"Suite B1",shift:"10-6",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"10:00 AM",eligible:["Packing","Shipping"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:8,name:"Eric",suite:"Suite B1",shift:"10-6",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"10:00 AM",eligible:["Shipping","QA","Packing"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:9,name:"Charise",suite:"Suite B1",shift:"10-6",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"10:00 AM",eligible:["Production Lead","RPH"],status:"Active",accom:[],accomNote:"",notes:"B32 Lead"},
+  {id:10,name:"David B",suite:"Suite B1",shift:"10-6",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"10:00 AM",eligible:["Production Lead","RPH"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:11,name:"Kelly",suite:"Suite B1",shift:"10-6",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"10:00 AM",eligible:["Shipping","QA"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:12,name:"Taylor O",suite:"Suite B1",shift:"10-6",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"10:00 AM",eligible:["QA","Packing"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:13,name:"Francheska",suite:"Suite B1",shift:"10-6",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"10:00 AM",eligible:["Production Lead","RPH"],status:"Active",accom:[],accomNote:"",notes:"B33 Lead"},
+  {id:14,name:"Margaret",suite:"Suite B1",shift:"10-6",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"10:00 AM",eligible:["Production Lead","RPH"],status:"Active",accom:[],accomNote:"",notes:"B34 Lead"},
+  {id:15,name:"Bahati",suite:"Suite B1",shift:"10-6",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"10:00 AM",eligible:["Shipping","QA","Packing"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:16,name:"Jamie",suite:"Suite B1",shift:"10-6",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"10:00 AM",eligible:["QA","Packing"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:17,name:"Devionne",suite:"Suite B1",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["Production Lead","RPH"],status:"Active",accom:[],accomNote:"",notes:"B35 Lead"},
+  {id:18,name:"Macie",suite:"Suite B1",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["Production Lead","RPH"],status:"Active",accom:[],accomNote:"",notes:"B36 Lead"},
+  {id:19,name:"Katrina",suite:"Suite B1",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["Production Lead","RPH"],status:"Active",accom:[],accomNote:"",notes:"B37 Lead"},
+  {id:20,name:"Shyla",suite:"Suite B1",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["Production Lead","RPH"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:100,name:"Christa",suite:"Suite B2",shift:"6-2",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"6:00 AM",eligible:["RPH"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:101,name:"Dori",suite:"Suite B2",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["Shipping"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:102,name:"Bobbie",suite:"Suite B2",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["QA"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:103,name:"Desmond",suite:"Suite B2",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["Packing"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:104,name:"Justin",suite:"Suite B2",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["RPH","Shipping"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:105,name:"Taylor",suite:"Suite B2",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["QA","Labeling"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:106,name:"Ravon",suite:"Suite B2",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["Packing"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:107,name:"Abdul",suite:"Suite B2",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["RPH"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:108,name:"Thomas",suite:"Suite B2",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["QA"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:109,name:"Antwan",suite:"Suite B2",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["Packing"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:110,name:"Bizhan",suite:"Suite B2",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["RPH","Shipping"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:111,name:"Gina",suite:"Suite B2",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["Shipping"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:112,name:"Hawa",suite:"Suite B2",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["QA"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:113,name:"Ha",suite:"Suite B2",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["RPH"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:114,name:"Nyree",suite:"Suite B2",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["QA","Labeling"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:115,name:"Geeta",suite:"Suite B2",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["RPH"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:116,name:"LaShawn",suite:"Suite B2",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["Shipping"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:117,name:"Zoria",suite:"Suite B2",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["Labeling"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:118,name:"Lori",suite:"Suite B2",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["Labeling"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:119,name:"Braxton",suite:"Suite B2",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["Shipping"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:200,name:"Erin C",suite:"Suite C – RO",shift:"6-2",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"6:00 AM",eligible:["RPH"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:201,name:"Kathy",suite:"Suite C – RO",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["RPH"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:202,name:"Cate",suite:"Suite C – RO",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["RPH"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:203,name:"Haftu",suite:"Suite C – RO",shift:"6-2",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"6:00 AM",eligible:["RPH"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:204,name:"Nicole O",suite:"Suite C – RO",shift:"6-2",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"6:00 AM",eligible:["RO Lead"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:205,name:"JonDrea B",suite:"Suite C – RO",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["RO Lead"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:206,name:"Samra",suite:"Suite C – RO",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["QA","Packing"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:207,name:"Amber O",suite:"Suite C – RO",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["QA","Packing"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:208,name:"Ramona",suite:"Suite C – RO",shift:"6-2",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"6:00 AM",eligible:["QA","Packing"],status:"Active",accom:[],accomNote:"",notes:""},
+  {id:209,name:"Nichole H",suite:"Suite C – RO",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["Labeling"],status:"Active",accom:[],accomNote:"",notes:"RO Labeler"},
+  {id:210,name:"Rojina",suite:"Suite C – RO",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"8:00 AM",eligible:["Labeling"],status:"Active",accom:[],accomNote:"",notes:"RO Labeler"},
+];
+let nextId = 500;
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+let sched={}, extras={}, overrides={}, notesData={}, podTimes={}, podLeads={}, attendLog={};
+let drugList = ["Kwikpen","Vials","Foundayo","Flex"];
+let curDay="Monday", curSuite="Suite B1", editingEmp=null, attendEditing=null;
+
+function initState(){
+  DAYS.forEach(d=>{
+    sched[d]={};extras[d]={};overrides[d]={};notesData[d]={};podLeads[d]={};attendLog[d]={};
+    SUITES.forEach(s=>{
+      sched[d][s]={};overrides[d][s]={};podLeads[d][s]={};attendLog[d][s]=[];
+      notesData[d][s]=Array(4).fill(null).map(()=>({name:"",off:"",co:"",late:""}));
+      extras[d][s]={Labeling:[],Overflow6am:[],Overflow84:[],Auxiliary:[],ROLeads:[],Runners:[],lbl6:[],lbl8:[],lbl10:[]};
+      if(!podTimes[s]) podTimes[s]={};
+      B1_PODS.forEach(p=>{
+        sched[d][s][p.id]={};
+        DUAL_COLS.forEach(c=>{sched[d][s][p.id]["L-"+c]=null;sched[d][s][p.id]["R-"+c]=null;});
+        if(!podTimes[s][p.id]) podTimes[s][p.id]=p.time;
+        if(!podTimes[s][p.id+"_lunch"]) podTimes[s][p.id+"_lunch"]=p.lunch;
+      });
+      B2_PODS.forEach(p=>{
+        if(!sched[d][s][p.id]) sched[d][s][p.id]={};
+        DUAL_COLS.forEach(c=>{
+          if(sched[d][s][p.id]["L-"+c]===undefined) sched[d][s][p.id]["L-"+c]=null;
+          if(sched[d][s][p.id]["R-"+c]===undefined) sched[d][s][p.id]["R-"+c]=null;
+        });
+        if(!podTimes[s][p.id]) podTimes[s][p.id]=p.time;
+        if(!podTimes[s][p.id+"_lunch"]) podTimes[s][p.id+"_lunch"]=p.lunch;
+      });
+      C_RPH.forEach(p=>{sched[d][s][p.id]={RPH1:null,RPH2:null,RPH3:null,RPH4:null};if(!podTimes[s][p.id+"_lunch"])podTimes[s][p.id+"_lunch"]=p.lunch;});
+      [...C_PACKING,...C_OVERFLOW].forEach(p=>{sched[d][s][p.id]={};PACK_COLS.forEach(c=>{sched[d][s][p.id]["L-"+c]=null;sched[d][s][p.id]["R-"+c]=null;});if(!podTimes[s][p.id+"_lunch"])podTimes[s][p.id+"_lunch"]=p.lunch;});
+    });
+  });
+}
+initState();
+
+// ═══════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════
+const ge=id=>EMPS.find(e=>e.id===id)||null;
+const stOf=id=>overrides[curDay]?.[curSuite]?.[id]||(ge(id)?.status)||"Active";
+const stCls=s=>({Active:"sp-active",PTO:"sp-pto","Time Off":"sp-off",NCNS:"sp-ncns",Late:"sp-late","Left Early":"sp-late",Medical:"sp-med",Suspended:"sp-sus"}[s]||"sp-active");
+const stIco=s=>({Active:"✅",PTO:"🏖️","Time Off":"📅",NCNS:"🚫",Late:"🕐","Left Early":"🚪",Medical:"🏥",Suspended:"⛔"}[s]||"✅");
+const badgeCls=p=>({RPH:"b-rph","Production Lead":"b-lead",Shipping:"b-ship",QA:"b-qa",Packing:"b-pack",Labeling:"b-label","RO Lead":"b-ro",Runner:"b-over",Auxiliary:"b-pos"}[p]||"b-pos");
+const posColor=p=>({RPH:"#5b21b6","Production Lead":"#166534",Shipping:"#1d4ed8",QA:"#047857",Packing:"#b45309",Labeling:"#92400e","RO Lead":"#9d174d",Runner:"#0e7490",Auxiliary:"#374151"}[p]||"#374151");
+const suiteBadge=s=>({"Suite B1":"b-suite","Suite B2":"b-b2","Suite C – RO":"b-ro-s"}[s]||"b-suite");
+const curEmps=()=>EMPS.filter(e=>e.suite===curSuite&&(e.workDays||WORK_DAYS).includes(curDay));
+const isSeated=e=>(e.accom||[]).includes("Seated Position");
+
+function placedIds(){
+  const s=new Set();
+  Object.values(sched[curDay]?.[curSuite]||{}).forEach(pod=>Object.values(pod).forEach(id=>{if(id)s.add(id);}));
+  Object.values(extras[curDay]?.[curSuite]||{}).forEach(arr=>arr.forEach(id=>s.add(id)));
+  return s;
+}
+
+// ═══════════════════════════════════════════════════
+// POD BUILDERS
+// ═══════════════════════════════════════════════════
+function lunchInput(podId){
+  const val=podTimes[curSuite]?.[podId+"_lunch"]||"";
+  return `<input style="border:none;background:transparent;color:#4c1d95;font-size:.6rem;font-weight:700;width:100%;text-align:center;cursor:text" value="${val}" onchange="updateLunch('${podId}',this.value)" onclick="event.stopPropagation()" placeholder="lunch"/>`;
+}
+function updateLunch(p,v){if(!podTimes[curSuite])podTimes[curSuite]={};podTimes[curSuite][p+"_lunch"]=v;}
+function changePodTime(p,v){if(!podTimes[curSuite])podTimes[curSuite]={};podTimes[curSuite][p]=v;render();}
+function getDrug(p){return podTimes[curSuite]?.[p+"_drug"]||"";}
+function getOT(p){return podTimes[curSuite]?.[p+"_ot"]||false;}
+function setDrug(p,v){if(!podTimes[curSuite])podTimes[curSuite]={};podTimes[curSuite][p+"_drug"]=v;}
+function toggleOT(p){if(!podTimes[curSuite])podTimes[curSuite]={};podTimes[curSuite][p+"_ot"]=!getOT(p);render();}
+function handleDrugSel(podId,sel){
+  if(sel.value==="__add__"){sel.value=getDrug(podId);const n=prompt("New drug/product name:");if(n&&n.trim()){const t=n.trim();if(!drugList.includes(t))drugList.push(t);setDrug(podId,t);render();};}
+  else setDrug(podId,sel.value);
+}
+function drugBarH(p){
+  const cur=getDrug(p),ot=getOT(p);
+  const opts=`<option value="">— Product —</option>`+drugList.map(d=>`<option value="${d}"${d===cur?" selected":""}>${d}</option>`).join("")+`<option value="__add__">＋ Add…</option>`;
+  return `<div class="pod-drug-bar"><span style="font-size:.55rem;color:#818cf8;font-weight:700">💊</span><select class="drug-sel" onchange="handleDrugSel('${p}',this)" onclick="event.stopPropagation()">${opts}</select><button class="ot-toggle ${ot?"ot-on":"ot-off"}" onclick="event.stopPropagation();toggleOT('${p}')">${ot?"🔴OT":"OT"}</button></div>`;
+}
+function getLeadName(p){const l=podLeads[curDay]?.[curSuite]?.[p];return l?l.name:null;}
+function leadBarH(p){
+  const name=getLeadName(p);
+  return `<div class="pod-lead-bar"><span style="font-size:.55rem;opacity:.8;text-transform:uppercase;letter-spacing:.5px">Lead:</span>${name?`<span class="pod-lead-name">⭐${name}</span><button class="pod-lead-btn" onclick="event.stopPropagation();leadClick(event,'${p}')">✎</button>`:`<span class="pod-lead-empty">Unassigned</span><button class="pod-lead-btn" onclick="event.stopPropagation();leadClick(event,'${p}')">+</button>`}</div>`;
+}
+function leadClick(ev,podId){
+  ev.stopPropagation();closeDrop();
+  const avail=curEmps().filter(e=>(e.eligible||[]).includes("Production Lead")&&stOf(e.id)==="Active");
+  const cur=podLeads[curDay]?.[curSuite]?.[podId];
+  let h=`<h4>Lead — ${podId}</h4>`;
+  if(cur)h+=`<div class="di cur">📍${cur.name}</div><div class="di drem" onclick="removeLead('${podId}')">✕ Remove</div><hr class="dsep">`;
+  h+=`<div class="dcat">SELECT LEAD:</div><div class="dscroll">`;
+  avail.forEach(e=>{if(cur&&e.id===cur.empId)return;h+=`<div class="di" onclick="assignLead(${e.id},'${podId}')"><span class="ddot" style="background:#166534"></span>${e.name}</div>`;});
+  h+=`</div>`;
+  const drop=document.getElementById("dropEl");
+  drop.innerHTML=h;drop.style.display="block";
+  const r=ev.currentTarget.getBoundingClientRect();
+  drop.style.top=(r.bottom+window.scrollY+2)+"px";drop.style.left=(r.left+window.scrollX)+"px";
+  requestAnimationFrame(()=>{const dr=drop.getBoundingClientRect();if(dr.right>window.innerWidth)drop.style.left=(window.innerWidth-dr.width-4)+"px";if(dr.bottom>window.innerHeight)drop.style.top=(r.top+window.scrollY-dr.height-2)+"px";});
+}
+function assignLead(empId,podId){const emp=ge(empId);if(!podLeads[curDay])podLeads[curDay]={};if(!podLeads[curDay][curSuite])podLeads[curDay][curSuite]={};podLeads[curDay][curSuite][podId]={empId,name:emp?emp.name:"?"};closeDrop();render();}
+function removeLead(p){if(podLeads[curDay]?.[curSuite])delete podLeads[curDay][curSuite][p];closeDrop();render();}
+
+function slotH(empId,slotKey,podId,extraKey,eidx){
+  const emp=ge(empId);
+  const pos=slotKey?(slotKey.replace(/^[LR]-/,"").replace(/\d+$/,"")):"";
+  const oc=extraKey?`slotClick(event,null,null,'${extraKey}',${eidx})`:`slotClick(event,'${podId}','${slotKey}',null,-1)`;
+  if(emp){const dot=emp.accom&&emp.accom.length?`<span class="accom-dot"></span>`:"";return `<span class="slot" style="background:${posColor(pos)};color:#fff" onclick="${oc}">${emp.name}${dot}</span>`;}
+  return `<span class="slot empty-slot" onclick="${oc}">+</span>`;
+}
+
+function buildPod(podDef,cols,podId){
+  const pd=sched[curDay]?.[curSuite]?.[podId]||{};
+  const pt=podTimes[curSuite]?.[podId]||podDef.time||"8a";
+  const ot=getOT(podId);
+  const gc=`repeat(${cols.length},1fr)`;
+  const sel=TIME_OPTS.map(t=>`<option${t===pt?" selected":""}>${t}</option>`).join("");
+  return `<div class="pod-card"${ot?' style="outline:2px solid #dc2626"':''}>
+    ${drugBarH(podId)}${leadBarH(podId)}
+    <div class="pod-title-bar">
+      <span class="pod-id">${podId}</span>
+      <select class="pod-time-sel" onchange="changePodTime('${podId}',this.value)" onclick="event.stopPropagation()">${sel}</select>
+    </div>
+    <div class="pod-col-header-row" style="grid-template-columns:${gc}">${cols.map(c=>`<div class="pod-ch">${c.label}</div>`).join("")}</div>
+    <div class="pod-name-row top-row" style="grid-template-columns:${gc}">${cols.map(c=>`<div class="pod-nc">${slotH(pd[c.topKey],c.topKey,podId,null,-1)}</div>`).join("")}</div>
+    <div class="pod-info-row" style="grid-template-columns:1fr 1fr"><div class="pod-info-cell" style="justify-content:flex-start;padding-left:6px">${podId}</div><div class="pod-info-cell">${lunchInput(podId)}</div></div>
+    <div class="pod-name-row bot-row" style="grid-template-columns:${gc}">${cols.map(c=>`<div class="pod-nc">${slotH(pd[c.botKey],c.botKey,podId,null,-1)}</div>`).join("")}</div>
+  </div>`;
+}
+function dualCols(){return DUAL_COLS.map(c=>({label:c,topKey:"L-"+c,botKey:"R-"+c}));}
+function packCols(){return PACK_COLS.map(c=>({label:c,topKey:"L-"+c,botKey:"R-"+c}));}
+
+// ═══════════════════════════════════════════════════
+// RENDERERS
+// ═══════════════════════════════════════════════════
+function renderB1(){
+  // Both groups side by side in one row
+  let h=`<div style="display:flex;gap:18px;align-items:flex-start">`;
+  B1_GROUPS.forEach(grp=>{
+    h+=`<div style="flex:1;min-width:0">`;
+    h+=`<div class="section-hdr">📦 ${grp.label}</div>`;
+    h+=`<div class="pod-group">`;
+    h+=`<div class="pod-col">${grp.left.map(pid=>{const p=B1_PODS.find(x=>x.id===pid);return p?buildPod(p,dualCols(),pid):""}).join("")}</div>`;
+    h+=`<div class="pod-col">${grp.right.map(pid=>{const p=B1_PODS.find(x=>x.id===pid);return p?buildPod(p,dualCols(),pid):""}).join("")}</div>`;
+    h+=`</div></div>`;
+  });
+  h+=`</div>`;
+  document.getElementById("mainArea").innerHTML=h;
+}
+function renderB2(){
+  // Three sections side by side, each with 4 pods stacked
+  let h=`<div style="display:flex;gap:18px;align-items:flex-start">`;
+  B2_GROUPS.forEach(grp=>{
+    h+=`<div style="flex:1;min-width:0">`;
+    h+=`<div class="section-hdr">📋 ${grp.label}</div>`;
+    h+=`<div class="pod-col">`;
+    grp.pods.forEach(pid=>{
+      const p=B2_PODS.find(x=>x.id===pid);
+      if(p) h+=buildPod(p,dualCols(),pid);
+    });
+    h+=`</div></div>`;
+  });
+  h+=`</div>`;
+  document.getElementById("mainArea").innerHTML=h;
+}
+function renderC(){
+  const ex=extras[curDay]?.[curSuite]||{};
+  let h=`<div class="section-hdr">🏷️ RO Labelers</div>`;
+  h+=`<table class="ro-table" style="margin-bottom:0"><tr><th>6:00 AM</th><th>8:00 AM</th><th>10:00 AM</th></tr>`;
+  for(let r=0;r<6;r++){h+=`<tr>`;[["lbl6","6:00 AM"],["lbl8","8:00 AM"],["lbl10","10:00 AM"]].forEach(([k,pos])=>{h+=`<td>${slotH((ex[k]||[])[r],pos,null,k,r)}</td>`;});h+=`</tr>`;}
+  h+=`</table>`;
+  h+=`<div class="section-hdr">💊 RPH Stations</div><div class="pod-group" style="flex-wrap:wrap;gap:8px">`;
+  C_RPH.forEach(pod=>{
+    const pd=sched[curDay]?.[curSuite]?.[pod.id]||{},ot=getOT(pod.id);
+    h+=`<div class="pod-card"${ot?' style="outline:2px solid #dc2626"':''}>
+      ${drugBarH(pod.id)}${leadBarH(pod.id)}
+      <div class="pod-title-bar"><span class="pod-id">${pod.id}</span><span style="color:#c4b5fd;font-size:.58rem">${pod.start}</span></div>
+      <div class="pod-col-header-row" style="grid-template-columns:repeat(4,1fr)"><div class="pod-ch">RPH 1</div><div class="pod-ch">RPH 2</div><div class="pod-ch">RPH 3</div><div class="pod-ch">RPH 4</div></div>
+      <div class="pod-name-row top-row" style="grid-template-columns:repeat(4,1fr)">${["RPH1","RPH2","RPH3","RPH4"].map(k=>`<div class="pod-nc">${slotH(pd[k],k,pod.id,null,-1)}</div>`).join("")}</div>
+      <div class="pod-info-row" style="grid-template-columns:1fr 1fr"><div class="pod-info-cell" style="justify-content:flex-start;padding-left:6px">${pod.id}</div><div class="pod-info-cell">${lunchInput(pod.id)}</div></div>
+    </div>`;
+  });
+  h+=`</div>`;
+  h+=`<div class="section-hdr">📦 Packing Pods</div><div class="pod-group" style="flex-wrap:wrap;gap:8px">`;
+  C_PACKING.forEach(pod=>{h+=buildPod(pod,packCols(),pod.id);});
+  h+=`</div>`;
+  h+=`<div class="section-hdr">🔄 Overflow Pods</div><div class="pod-group" style="flex-wrap:wrap;gap:8px">`;
+  C_OVERFLOW.forEach(pod=>{h+=buildPod(pod,packCols(),pod.id);});
+  h+=`</div>`;
+  document.getElementById("mainArea").innerHTML=h;
+}
+
+function renderSidebar(){
+  const placed=placedIds(),emps=curEmps(),ex=extras[curDay]?.[curSuite]||{};
+  let h="";
+  const defs=curSuite==="Suite B1"?[["Auxiliary","Auxiliary"],["Overflow6am","Overflow 6am"]]:curSuite==="Suite B2"?[["Labeling","Labeling"],["Overflow6am","Overflow 6am"],["Overflow84","Overflow 8-4"],["Auxiliary","Auxiliary"]]:[["ROLeads","RO Leads"],["Runners","Runners"],["Auxiliary","Auxiliary"]];
+  defs.forEach(([k,label])=>{
+    if(!ex[k])ex[k]=[];
+    h+=`<div class="sb-block"><div class="sb-head">${label}</div><div class="sb-chip-row">`;
+    ex[k].forEach((id,i)=>{const e=ge(id);if(e)h+=`<span class="slot" style="background:#0e7490;color:#cffafe;font-size:.6rem" onclick="slotClick(event,null,null,'${k}',${i})">${e.name}</span>`;});
+    h+=`<span class="slot empty-slot" style="font-size:.55rem" onclick="slotClick(event,null,null,'${k}',-1)">+</span></div></div>`;
+  });
+  const una=emps.filter(e=>stOf(e.id)==="Active"&&!placed.has(e.id));
+  h+=`<div class="sb-block"><div class="sb-head">📋 Unassigned (${una.length})</div><div class="sb-body">`;
+  if(una.length)una.forEach(e=>{const dot=e.accom&&e.accom.length?`<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#f59e0b;margin-left:2px"></span>`:"";h+=`<div class="sb-item"><span>${e.name}${dot}</span><span style="font-size:.55rem;color:#9d7bcf">${(e.eligible||[]).slice(0,2).join(",")}</span></div>`;});
+  else h+=`<div class="sb-empty">All placed ✓</div>`;
+  h+=`</div></div>`;
+  const out=emps.filter(e=>stOf(e.id)!=="Active");
+  if(out.length){h+=`<div class="sb-block"><div class="sb-head">⚠️ Out Today</div><div class="sb-body" style="display:flex;flex-wrap:wrap;gap:2px;padding:4px">`;out.forEach(e=>h+=`<span class="out-chip ${stCls(stOf(e.id))}">${stIco(stOf(e.id))} ${e.name}</span>`);h+=`</div></div>`;}
+  const nts=notesData[curDay]?.[curSuite]||[];
+  h+=`<div class="sb-block"><div class="sb-head">📝 Moved Off Schedule</div><div class="sb-body" style="padding:2px"><table class="note-table"><tr><th>Name</th><th>Off</th><th>C/O</th><th>Late</th></tr>`;
+  nts.forEach((r,i)=>h+=`<tr><td><input class="ni" value="${r.name}" onchange="updNote(${i},'name',this.value)" placeholder="Name"/></td><td><input class="ni" value="${r.off}" onchange="updNote(${i},'off',this.value)"/></td><td><input class="ni" value="${r.co}" onchange="updNote(${i},'co',this.value)"/></td><td><input class="ni" value="${r.late}" onchange="updNote(${i},'late',this.value)"/></td></tr>`);
+  h+=`</table></div></div>`;
+  document.getElementById("sidebar").innerHTML=h;
+}
+function updNote(i,f,v){notesData[curDay][curSuite][i][f]=v;}
+
+function render(){
+  if(curSuite==="Suite B1")renderB1();
+  else if(curSuite==="Suite B2")renderB2();
+  else renderC();
+  renderSidebar();
+}
+
+// ═══════════════════════════════════════════════════
+// SLOT CLICK
+// ═══════════════════════════════════════════════════
+function slotClick(ev,podId,slotKey,extraKey,eidx){
+  ev.stopPropagation();closeDrop();
+  const placed=placedIds();
+  const curId=podId?(sched[curDay]?.[curSuite]?.[podId]||{})[slotKey]:(eidx>=0?(extras[curDay]?.[curSuite]?.[extraKey]||[])[eidx]:null);
+  const curEmp=ge(curId);
+  const pos=slotKey?(slotKey.replace(/^[LR]-/,"").replace(/\d+$/,"")):"";
+  const avail=curEmps().filter(e=>stOf(e.id)==="Active"&&!placed.has(e.id)&&e.id!==curId);
+  let h=`<h4>${podId?podId+" · ":""}${pos||extraKey||"Slot"}</h4>`;
+  if(curEmp){h+=`<div class="di cur">📍${curEmp.name}</div><hr class="dsep"><div class="dcat">MARK AS:</div>`;["NCNS","PTO","Time Off","Late","Left Early","Medical"].forEach(st=>{h+=`<div class="di doff" onclick="markOff(${curEmp.id},'${st}','${podId||""}','${slotKey||""}','${extraKey||""}',${eidx})">${stIco(st)} ${st}</div>`;});h+=`<hr class="dsep"><div class="di drem" onclick="removeSlot('${podId||""}','${slotKey||""}','${extraKey||""}',${eidx})">✕ Remove</div><hr class="dsep">`;}
+  if(avail.length){h+=`<div class="dcat">ASSIGN:</div><div class="dscroll">`;avail.forEach(emp=>{h+=`<div class="di" onclick="assignSlot(${emp.id},'${podId||""}','${slotKey||""}','${extraKey||""}',${eidx})"><span class="ddot" style="background:${posColor(pos)}"></span>${emp.name}${emp.accom&&emp.accom.length?" 🟡":""}<span style="font-size:.55rem;opacity:.6;margin-left:auto">${(emp.eligible||[]).slice(0,2).join(",")}</span></div>`;});h+=`</div>`;}
+  else if(!curEmp)h+=`<div style="color:#a78bfa;font-size:.67rem;padding:3px">No available employees</div>`;
+  const drop=document.getElementById("dropEl");
+  drop.innerHTML=h;drop.style.display="block";
+  const r=ev.currentTarget.getBoundingClientRect();
+  drop.style.top=(r.bottom+window.scrollY+2)+"px";drop.style.left=(r.left+window.scrollX)+"px";
+  requestAnimationFrame(()=>{const dr=drop.getBoundingClientRect();if(dr.right>window.innerWidth)drop.style.left=(window.innerWidth-dr.width-4)+"px";if(dr.bottom>window.innerHeight)drop.style.top=(r.top+window.scrollY-dr.height-2)+"px";});
+}
+function assignSlot(id,podId,slotKey,extraKey,eidx){
+  if(podId){if(!sched[curDay][curSuite][podId])sched[curDay][curSuite][podId]={};sched[curDay][curSuite][podId][slotKey]=id;}
+  else{if(eidx>=0)extras[curDay][curSuite][extraKey][eidx]=id;else extras[curDay][curSuite][extraKey].push(id);}
+  closeDrop();render();
+}
+function removeSlot(podId,slotKey,extraKey,eidx){
+  if(podId)sched[curDay][curSuite][podId][slotKey]=null;
+  else extras[curDay][curSuite][extraKey].splice(eidx,1);
+  closeDrop();render();
+}
+function markOff(id,status,podId,slotKey,extraKey,eidx){
+  logAttendance(id,status,curDay,curSuite);closeDrop();render();
+}
+function closeDrop(){document.getElementById("dropEl").style.display="none";}
+document.addEventListener("click",closeDrop);
+document.getElementById("dropEl").addEventListener("click",e=>e.stopPropagation());
+
+// ═══════════════════════════════════════════════════
+// RANDOMIZE / CLEAR
+// ═══════════════════════════════════════════════════
+function tryAssign(podId,slotKey,empPool,used){
+  const pos=slotKey.replace(/^[LR]-/,"").replace(/\d+$/,"");
+  let e;
+  if(pos==="Shipping")e=empPool.find(x=>!used.has(x.id)&&isSeated(x)&&(x.eligible||[]).includes(pos));
+  if(!e)e=empPool.find(x=>!used.has(x.id)&&!isSeated(x)&&(x.eligible||[]).includes(pos));
+  if(!e)e=empPool.find(x=>!used.has(x.id)&&(x.eligible||[]).includes(pos));
+  if(e){if(!sched[curDay][curSuite][podId])sched[curDay][curSuite][podId]={};sched[curDay][curSuite][podId][slotKey]=e.id;used.add(e.id);}
+}
+function randomizeSuite(){
+  const emps=curEmps().filter(e=>stOf(e.id)==="Active").sort(()=>Math.random()-.5);
+  const used=new Set();
+  if(curSuite==="Suite B1")B1_PODS.forEach(p=>DUAL_COLS.forEach(c=>{tryAssign(p.id,"L-"+c,emps,used);tryAssign(p.id,"R-"+c,emps,used);}));
+  else if(curSuite==="Suite B2")B2_PODS.forEach(p=>DUAL_COLS.forEach(c=>{tryAssign(p.id,"L-"+c,emps,used);tryAssign(p.id,"R-"+c,emps,used);}));
+  else{
+    C_RPH.forEach(p=>["RPH1","RPH2","RPH3","RPH4"].forEach(k=>{const e=emps.find(x=>!used.has(x.id)&&(x.eligible||[]).includes("RPH"));if(e){sched[curDay][curSuite][p.id][k]=e.id;used.add(e.id);}}));
+    [...C_PACKING,...C_OVERFLOW].forEach(p=>PACK_COLS.forEach(c=>{tryAssign(p.id,"L-"+c,emps,used);tryAssign(p.id,"R-"+c,emps,used);}));
+  }
+  render();
+}
+function clearSuite(){
+  Object.values(sched[curDay]?.[curSuite]||{}).forEach(pod=>Object.keys(pod).forEach(k=>pod[k]=null));
+  Object.keys(extras[curDay]?.[curSuite]||{}).forEach(k=>extras[curDay][curSuite][k]=[]);
+  render();
+}
+
+// ═══════════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════════
+function switchMain(tab){
+  document.getElementById("staffPage").classList.toggle("active",tab==="staff");
+  document.getElementById("schedPage").classList.toggle("active",tab==="sched");
+  document.getElementById("attendPage").classList.toggle("active",tab==="attend");
+  document.getElementById("navStaff").classList.toggle("active",tab==="staff");
+  document.getElementById("navSched").classList.toggle("active",tab==="sched");
+  document.getElementById("navAttend").classList.toggle("active",tab==="attend");
+  if(tab==="staff")renderStaffTable();
+  if(tab==="sched"){renderSuiteTabs();renderDayTabs();render();}
+  if(tab==="attend"){document.getElementById("attendDay").value=curDay;renderAttendance();}
+}
+function renderSuiteTabs(){document.getElementById("suiteTabs").innerHTML=`<span class="sub-bar-label">SUITE:</span>`+SUITES.map(s=>`<div class="sub-tab${s===curSuite?" active":""}" onclick="setSuite('${s}')">${s}</div>`).join("");}
+function renderDayTabs(){document.getElementById("dayTabs").innerHTML=`<span class="sub-bar-label">DAY:</span>`+DAYS.map(d=>`<div class="sub-tab${d===curDay?" active":""}" onclick="setDay('${d}')">${d.slice(0,3)}</div>`).join("");}
+function setSuite(s){curSuite=s;renderSuiteTabs();render();}
+function setDay(d){curDay=d;renderDayTabs();render();}
+
+// ═══════════════════════════════════════════════════
+// STAFF TABLE
+// ═══════════════════════════════════════════════════
+function renderStaffTable(){
+  const q=(document.getElementById("staffSearch").value||"").toLowerCase();
+  const fs=document.getElementById("filterSuite").value;
+  const fst=document.getElementById("filterStatus").value;
+  const emps=EMPS.filter(e=>{if(q&&!e.name.toLowerCase().includes(q))return false;if(fs!=="All"&&e.suite!==fs)return false;if(fst!=="All"&&e.status!==fst)return false;return true;});
+  document.getElementById("staffBody").innerHTML=emps.map(e=>{
+    const posH=(e.eligible||[]).map(p=>`<span class="badge ${badgeCls(p)}">${p}</span>`).join("");
+    const accomH=e.accom&&e.accom.length?e.accom.map(a=>`<span class="badge b-accom">${a}</span>`).join(""):`<span style="color:#ccc;font-size:.6rem">None</span>`;
+    const shiftLabel=e.shift==="Custom"?(e.customShift||"Custom"):(e.shift||"—");
+    const wdH=(e.workDays||[]).map(d=>`<span class="badge" style="background:#e0e7ff;color:#3730a3;font-size:.56rem">${d.slice(0,2)}</span>`).join(" ");
+    return `<tr><td><strong>${e.name}</strong></td><td><span class="badge ${suiteBadge(e.suite)}">${e.suite}</span></td><td><span class="badge" style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0">${shiftLabel}</span></td><td>${wdH||"—"}</td><td>${posH||"—"}</td><td>${accomH}</td><td><span class="badge ${stCls(e.status)}">${stIco(e.status)} ${e.status}</span></td><td style="max-width:120px;color:#6b21a8;font-size:.6rem">${e.notes||""}</td><td><button class="edit-btn-sm" onclick="openEmpModal(${e.id})" style="padding:2px 7px;border-radius:5px;border:none;background:#ede9fe;color:#5b21b6;font-size:.6rem;font-weight:700;cursor:pointer;margin-right:3px">Edit</button><button onclick="delEmp(${e.id})" style="padding:2px 7px;border-radius:5px;border:none;background:#fee2e2;color:#991b1b;font-size:.6rem;font-weight:700;cursor:pointer">Del</button></td></tr>`;
+  }).join("");
+}
+
+// ═══════════════════════════════════════════════════
+// EMP MODAL
+// ═══════════════════════════════════════════════════
+function openEmpModal(id){
+  const src=id?EMPS.find(e=>e.id===id):null;
+  editingEmp=src?{...src,eligible:[...(src.eligible||[])],accom:[...(src.accom||[])],workDays:[...(src.workDays||["Monday","Tuesday","Wednesday","Thursday","Friday"])]}:{id:null,name:"",suite:"Suite B1",shift:"8-4",customShift:"",workDays:["Monday","Tuesday","Wednesday","Thursday","Friday"],start:"",eligible:[],status:"Active",accom:[],accomNote:"",notes:""};
+  renderEmpForm();document.getElementById("mbg").classList.add("open");
+}
+function closeModal(){document.getElementById("mbg").classList.remove("open");editingEmp=null;}
+document.getElementById("mbg").addEventListener("click",e=>{if(e.target===e.currentTarget)closeModal();});
+function renderEmpForm(){
+  const e=editingEmp,isNew=!e.id;
+  document.getElementById("mTitle").textContent=isNew?"Add Employee":`Edit: ${e.name}`;
+  const posH=ALL_POS.map(p=>`<button class="pb${(e.eligible||[]).includes(p)?" on":""}" onclick="tPos('${p}')">${p}</button>`).join("");
+  const suiteH=SUITES.map(s=>`<button class="sb2${e.suite===s?" on":""}" onclick="tSuite('${s}')">${s}</button>`).join("");
+  const stH=STATUS_OPTS.map(s=>`<option${s===e.status?" selected":""}>${s}</option>`).join("");
+  const shH=SHIFT_OPTS.map(s=>`<option${s===e.shift?" selected":""}>${s}</option>`).join("");
+  const wdH=WORK_DAYS.map(d=>`<label style="display:inline-flex;align-items:center;gap:3px;margin:2px 4px;font-size:.65rem;color:#e9d5ff;cursor:pointer"><input type="checkbox" ${(e.workDays||[]).includes(d)?"checked":""} onchange="tWorkDay('${d}',this.checked)"/>${d.slice(0,3)}</label>`).join("");
+  const acH=ACCOM_TYPES.map(a=>`<label class="accom-row"><input type="checkbox" ${(e.accom||[]).includes(a)?"checked":""} onchange="tAccom('${a}',this.checked)"/> ${a}</label>`).join("");
+  document.getElementById("mBody").innerHTML=`
+    <div class="mrow"><div><label class="ml">Full Name</label><input class="mi" id="fN" value="${e.name}" placeholder="Name"/></div><div><label class="ml">Status</label><select class="mi" id="fSt">${stH}</select></div></div>
+    <label class="ml">Suite</label><div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:3px">${suiteH}</div>
+    <div class="mrow"><div><label class="ml">Shift</label><select class="mi" id="fSh" onchange="onShiftChange(this.value)">${shH}</select></div><div id="customShiftWrap" style="display:${e.shift==="Custom"?"block":"none"}"><label class="ml">Custom Shift</label><input class="mi" id="fCustom" value="${e.customShift||""}" placeholder="e.g. 7-3"/></div></div>
+    <label class="ml">Work Days</label><div style="background:#2d1060;border:1px solid #5b21b6;border-radius:5px;padding:5px 7px;margin-top:3px;display:flex;flex-wrap:wrap">${wdH}</div>
+    <label class="ml">Eligible Positions</label><div class="pb-wrap">${posH}</div>
+    <label class="ml">Accommodations <span style="color:#f59e0b;font-size:.6rem">⚠ Seated → Shipping priority</span></label>
+    <div class="accom-box">${acH}<label class="ml" style="margin-top:5px">Notes</label><input class="mi" id="fAcN" value="${e.accomNote||""}" placeholder="Details..."/></div>
+    <label class="ml">Internal Notes</label><input class="mi" id="fNotes" value="${e.notes||""}" placeholder="e.g. Lead for B31"/>
+    <div class="ma"><button class="mcan" onclick="closeModal()">Cancel</button>${!isNew?`<button class="mdel" onclick="delEmp(${e.id})">🗑 Delete</button>`:""}<button class="msave" onclick="saveEmp(${isNew})">💾 Save</button></div>`;
+}
+function onShiftChange(v){const w=document.getElementById("customShiftWrap");if(w)w.style.display=v==="Custom"?"block":"none";}
+function tPos(p){if(!editingEmp)return;const i=(editingEmp.eligible||[]).indexOf(p);i>=0?editingEmp.eligible.splice(i,1):editingEmp.eligible.push(p);renderEmpForm();}
+function tSuite(s){if(!editingEmp)return;editingEmp.suite=s;renderEmpForm();}
+function tWorkDay(d,c){if(!editingEmp)return;if(!editingEmp.workDays)editingEmp.workDays=[];if(c){if(!editingEmp.workDays.includes(d))editingEmp.workDays.push(d);}else editingEmp.workDays=editingEmp.workDays.filter(x=>x!==d);}
+function tAccom(a,c){if(!editingEmp)return;if(!editingEmp.accom)editingEmp.accom=[];if(c){if(!editingEmp.accom.includes(a))editingEmp.accom.push(a);}else editingEmp.accom=editingEmp.accom.filter(x=>x!==a);}
+function saveEmp(isNew){
+  editingEmp.name=document.getElementById("fN").value.trim();
+  editingEmp.status=document.getElementById("fSt").value;
+  editingEmp.shift=document.getElementById("fSh").value;
+  editingEmp.customShift=document.getElementById("fCustom")?.value||"";
+  editingEmp.accomNote=document.getElementById("fAcN").value;
+  editingEmp.notes=document.getElementById("fNotes").value;
+  if(!editingEmp.name)return;
+  if(isNew){editingEmp.id=nextId++;EMPS.push({...editingEmp});}
+  else{const i=EMPS.findIndex(e=>e.id===editingEmp.id);if(i>=0)EMPS[i]={...editingEmp};}
+  closeModal();renderStaffTable();
+}
+function delEmp(id){
+  if(!confirm("Remove this employee?"))return;
+  EMPS=EMPS.filter(e=>e.id!==id);
+  DAYS.forEach(d=>SUITES.forEach(s=>{if(sched[d]?.[s])Object.values(sched[d][s]).forEach(pod=>Object.keys(pod).forEach(k=>{if(pod[k]===id)pod[k]=null;}));if(extras[d]?.[s])Object.keys(extras[d][s]).forEach(k=>{extras[d][s][k]=extras[d][s][k].filter(x=>x!==id);});}));
+  closeModal();renderStaffTable();
+}
+
+// ═══════════════════════════════════════════════════
+// ATTENDANCE
+// ═══════════════════════════════════════════════════
+function logAttendance(empId,status,day,suite,coInfo="",notedBy=""){
+  if(!attendLog[day])attendLog[day]={};if(!attendLog[day][suite])attendLog[day][suite]=[];
+  const emp=EMPS.find(e=>e.id===empId);
+  attendLog[day][suite]=attendLog[day][suite].filter(r=>r.empId!==empId);
+  attendLog[day][suite].push({empId,name:emp?emp.name:"?",suite,status,coInfo,notedBy,time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})});
+  if(!overrides[day])overrides[day]={};if(!overrides[day][suite])overrides[day][suite]={};overrides[day][suite][empId]=status;
+  if(sched[day]?.[suite])Object.values(sched[day][suite]).forEach(pod=>Object.keys(pod).forEach(k=>{if(pod[k]===empId)pod[k]=null;}));
+  if(extras[day]?.[suite])Object.keys(extras[day][suite]).forEach(k=>{extras[day][suite][k]=extras[day][suite][k].filter(x=>x!==empId);});
+}
+function removeAttendLog(empId,day,suite){
+  if(attendLog[day]?.[suite])attendLog[day][suite]=attendLog[day][suite].filter(r=>r.empId!==empId);
+  if(overrides[day]?.[suite])delete overrides[day][suite][empId];
+  renderAttendance();if(curSuite===suite&&curDay===day)render();
+}
+function renderAttendance(){
+  const day=document.getElementById("attendDay").value;
+  const suiteF=document.getElementById("attendSuite").value;
+  const stF=document.getElementById("attendFilter").value;
+  let rows=[];
+  SUITES.forEach(s=>{if(suiteF!=="All"&&s!==suiteF)return;(attendLog[day]?.[s]||[]).forEach(r=>{if(stF!=="All"&&r.status!==stF)return;rows.push({...r,day});});});
+  const counts={"PTO":0,"Time Off":0,"NCNS":0,"Late":0,"Left Early":0,"Medical":0,"Suspended":0};
+  rows.forEach(r=>{if(counts[r.status]!==undefined)counts[r.status]++;});
+  const cardDefs=[{k:"PTO",cls:"sc-pto",ico:"🏖️"},{k:"Time Off",cls:"sc-off",ico:"📅"},{k:"NCNS",cls:"sc-ncns",ico:"🚫"},{k:"Late",cls:"sc-late",ico:"🕐"},{k:"Left Early",cls:"sc-late",ico:"🚪"},{k:"Medical",cls:"sc-med",ico:"🏥"},{k:"Suspended",cls:"sc-sus",ico:"⛔"}];
+  let sumH=`<div class="summary-card sc-total"><div class="sc-num">${rows.length}</div><div class="sc-lbl">Total Out</div></div>`;
+  cardDefs.forEach(c=>{if(counts[c.k]>0)sumH+=`<div class="summary-card ${c.cls}"><div class="sc-num">${counts[c.k]}</div><div class="sc-lbl">${c.ico} ${c.k}</div></div>`;});
+  document.getElementById("attendSummary").innerHTML=sumH;
+  const tbody=document.getElementById("attendBody");
+  if(!rows.length){tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;color:#c4b5fd;padding:16px;font-style:italic">No call-offs logged for ${day}</td></tr>`;}
+  else tbody.innerHTML=rows.map(r=>`<tr><td><strong>${r.name}</strong></td><td><span class="badge ${suiteBadge(r.suite)}">${r.suite}</span></td><td>${r.day}</td><td><span class="badge ${stCls(r.status)}">${stIco(r.status)} ${r.status}</span></td><td style="font-size:.67rem;color:#6b21a8">${r.coInfo||"—"}</td><td style="font-size:.67rem;color:#6b21a8">${r.notedBy||"—"}</td><td style="font-size:.67rem;color:#9d7bcf">${r.time}</td><td><button onclick="openEditAttend(${r.empId},'${r.day}','${r.suite}')" style="padding:2px 7px;border-radius:5px;border:none;background:#ede9fe;color:#5b21b6;font-size:.6rem;cursor:pointer;margin-right:3px">Edit</button><button onclick="removeAttendLog(${r.empId},'${r.day}','${r.suite}')" style="padding:2px 7px;border-radius:5px;border:none;background:#fee2e2;color:#991b1b;font-size:.6rem;cursor:pointer">Clear</button></td></tr>`).join("");
+  let notesH="<div style='display:flex;flex-wrap:wrap;gap:10px;margin-top:4px'>";
+  SUITES.filter(s=>suiteF==="All"||s===suiteF).forEach(s=>{const nts=(notesData[day]?.[s]||[]).filter(r=>r.name);notesH+=`<div class="att-notes-block" style="flex:1;min-width:220px"><div class="att-notes-hdr">${s} – Moved Off</div>`;if(!nts.length)notesH+=`<div class="att-empty">No entries</div>`;else nts.forEach(r=>notesH+=`<div class="att-log-row"><span style="font-weight:700;color:#3b0764">${r.name}</span><span class="badge ${r.off?"b-ncns":r.late?"b-late":"b-pos"}">${r.off||r.co||r.late||"—"}</span></div>`);notesH+=`</div>`;});
+  document.getElementById("notesGrid").innerHTML=notesH+"</div>";
+}
+function openQuickCallOff(){attendEditing={empId:null,day:curDay,suite:curSuite,status:"NCNS",coInfo:"",notedBy:""};renderCallOffForm();document.getElementById("mbg").classList.add("open");}
+function openEditAttend(empId,day,suite){const row=(attendLog[day]?.[suite]||[]).find(r=>r.empId===empId);attendEditing={empId,day,suite,status:row?.status||"NCNS",coInfo:row?.coInfo||"",notedBy:row?.notedBy||""};renderCallOffForm();document.getElementById("mbg").classList.add("open");}
+function renderCallOffForm(){
+  const a=attendEditing;
+  document.getElementById("mTitle").textContent="Log Call-Off";
+  const empSel=EMPS.map(e=>`<option value="${e.id}"${a.empId===e.id?" selected":""}>${e.name} (${e.suite})</option>`).join("");
+  const daySel=DAYS.map(d=>`<option${d===a.day?" selected":""}>${d}</option>`).join("");
+  const suiteSel=SUITES.map(s=>`<option${s===a.suite?" selected":""}>${s}</option>`).join("");
+  const stSel=["PTO","Time Off","NCNS","Late","Left Early","Medical","Suspended"].map(s=>`<option${s===a.status?" selected":""}>${s}</option>`).join("");
+  document.getElementById("mBody").innerHTML=`
+    <label class="ml">Employee</label><select class="mi" id="caEmp">${empSel}</select>
+    <div class="mrow"><div><label class="ml">Day</label><select class="mi" id="caDay">${daySel}</select></div><div><label class="ml">Suite</label><select class="mi" id="caSuite">${suiteSel}</select></div></div>
+    <label class="ml">Status</label><select class="mi" id="caSt">${stSel}</select>
+    <label class="ml">C/O Info</label><input class="mi" id="caInfo" value="${a.coInfo}" placeholder="e.g. called out at 6:15am"/>
+    <label class="ml">Noted By</label><input class="mi" id="caBy" value="${a.notedBy}" placeholder="Manager/Lead name"/>
+    <div class="ma"><button class="mcan" onclick="closeModal()">Cancel</button><button class="msave" onclick="saveCallOff()">💾 Save</button></div>`;
+}
+function saveCallOff(){
+  logAttendance(parseInt(document.getElementById("caEmp").value),document.getElementById("caSt").value,document.getElementById("caDay").value,document.getElementById("caSuite").value,document.getElementById("caInfo").value,document.getElementById("caBy").value);
+  closeModal();renderAttendance();if(curDay===document.getElementById("caDay")?.value)render();
+}
+
+// ═══════════════════════════════════════════════════
+// RX ERROR TRACKER
+// ═══════════════════════════════════════════════════
+const ERROR_TYPES = [
+  "Wrong Drug","Wrong Dose","Wrong Quantity","Wrong Patient",
+  "Wrong Directions","Drug Interaction","Allergy Override",
+  "Duplicate Rx","Incorrect DAW","Other"
+];
+const ERROR_SEVERITY = ["Low","Medium","High","Critical"];
+const SEV_COLORS = {Low:"#d1fae5|#065f46",Medium:"#fef9c3|#854d0e",High:"#ffedd5|#9a3412",Critical:"#fee2e2|#991b1b"};
+
+// rxErrors[]: {id, date, day, suite, rphId, rphName, rxNum, errorType, description, severity, loggedBy, time}
+let rxErrors = [];
+let errNextId = 1;
+let editingErr = null;
+
+function getRphList(){
+  return EMPS.filter(e=>(e.eligible||[]).includes("RPH"));
+}
+
+function openErrModal(id){
+  editingErr = id ? {...rxErrors.find(e=>e.id===id)} : {
+    id:null, date:new Date().toLocaleDateString(), day:curDay,
+    suite:curSuite, rphId:null, rphName:"", rxNum:"",
+    errorType:"Wrong Drug", description:"", severity:"High",
+    loggedBy:"", time:""
+  };
+  renderErrForm();
+  document.getElementById("errMbg").classList.add("open");
+}
+function closeErrModal(){document.getElementById("errMbg").classList.remove("open");editingErr=null;}
+document.getElementById("errMbg").addEventListener("click",e=>{if(e.target===e.currentTarget)closeErrModal();});
+
+function renderErrForm(){
+  const e=editingErr, isNew=!e.id;
+  document.getElementById("errMTitle").textContent=isNew?"Log Verified Rx Error":"Edit Error Log";
+  const rphList=getRphList();
+  const rphH=`<option value="">— Select RPH —</option>`+rphList.map(r=>`<option value="${r.id}"${e.rphId===r.id?" selected":""}>${r.name} (${r.suite})</option>`).join("")+`<option value="__manual__">Enter manually…</option>`;
+  const typeH=ERROR_TYPES.map(t=>`<option${t===e.errorType?" selected":""}>${t}</option>`).join("");
+  const sevH=ERROR_SEVERITY.map(s=>`<option${s===e.severity?" selected":""}>${s}</option>`).join("");
+  const dayH=DAYS.map(d=>`<option${d===e.day?" selected":""}>${d}</option>`).join("");
+  const suiteH=SUITES.map(s=>`<option${s===e.suite?" selected":""}>${s}</option>`).join("");
+  const showManual=e.rphId==="__manual__"||(!e.rphId&&e.rphName&&!rphList.find(r=>r.name===e.rphName));
+
+  document.getElementById("errMBody").innerHTML=`
+    <div style="background:#450a0a;border:1px solid #f87171;border-radius:6px;padding:8px 10px;margin-bottom:10px;font-size:.68rem;color:#fca5a5">
+      ⚠️ <strong>Only log errors that were VERIFIED without being fixed.</strong> Errors caught and corrected before verification do not need to be logged here.
+    </div>
+    <div class="mrow">
+      <div><label class="ml">Day</label><select class="mi" id="eDy">${dayH}</select></div>
+      <div><label class="ml">Suite</label><select class="mi" id="eSu">${suiteH}</select></div>
+    </div>
+    <label class="ml">RPH Who Verified</label>
+    <select class="mi" id="eRph" onchange="onRphSelect(this.value)">${rphH}</select>
+    <div id="rphManualWrap" style="display:${showManual?"block":"none"}">
+      <label class="ml">RPH Name (manual)</label>
+      <input class="mi" id="eRphManual" value="${showManual?e.rphName:""}" placeholder="Enter RPH name"/>
+    </div>
+    <div class="mrow">
+      <div><label class="ml">Rx Number</label><input class="mi" id="eRx" value="${e.rxNum}" placeholder="e.g. 1234567"/></div>
+      <div><label class="ml">Error Type</label><select class="mi" id="eType">${typeH}</select></div>
+    </div>
+    <label class="ml">Severity</label>
+    <div style="display:flex;gap:6px;margin-top:3px">
+      ${ERROR_SEVERITY.map(s=>{const [bg,col]=SEV_COLORS[s].split("|");return`<button onclick="setErrSev('${s}')" id="sevBtn${s}" style="flex:1;padding:4px;border-radius:6px;border:2px solid ${e.severity===s?col:"transparent"};background:${bg};color:${col};font-size:.65rem;font-weight:700;cursor:pointer">${s}</button>`;}).join("")}
+    </div>
+    <input type="hidden" id="eSev" value="${e.severity}"/>
+    <label class="ml">Description of Error</label>
+    <textarea class="mi" id="eDesc" rows="3" placeholder="Describe what the error was and what should have been correct…" style="resize:vertical">${e.description}</textarea>
+    <label class="ml">Logged By</label>
+    <input class="mi" id="eBy" value="${e.loggedBy}" placeholder="Your name / manager name"/>
+    <div class="ma">
+      <button class="mcan" onclick="closeErrModal()">Cancel</button>
+      ${!isNew?`<button class="mdel" onclick="deleteErr(${e.id})">🗑 Delete</button>`:""}
+      <button class="msave" onclick="saveErr(${isNew})">💾 Save</button>
+    </div>`;
+}
+
+function onRphSelect(val){
+  const wrap=document.getElementById("rphManualWrap");
+  if(wrap) wrap.style.display=val==="__manual__"?"block":"none";
+}
+function setErrSev(s){
+  document.getElementById("eSev").value=s;
+  ERROR_SEVERITY.forEach(sv=>{
+    const btn=document.getElementById("sevBtn"+sv);
+    if(btn){const[bg,col]=SEV_COLORS[sv].split("|");btn.style.border=`2px solid ${sv===s?col:"transparent"}`;}
+  });
+  if(editingErr) editingErr.severity=s;
+}
+
+function saveErr(isNew){
+  const rphSel=document.getElementById("eRph").value;
+  const rphList=getRphList();
+  let rphId=null, rphName="";
+  if(rphSel==="__manual__"){
+    rphName=document.getElementById("eRphManual")?.value?.trim()||"";
+  } else if(rphSel){
+    rphId=parseInt(rphSel);
+    const r=rphList.find(x=>x.id===rphId);
+    rphName=r?r.name:rphSel;
+  }
+  const entry={
+    id: isNew?errNextId++:editingErr.id,
+    date: new Date().toLocaleDateString(),
+    day: document.getElementById("eDy").value,
+    suite: document.getElementById("eSu").value,
+    rphId, rphName,
+    rxNum: document.getElementById("eRx").value.trim(),
+    errorType: document.getElementById("eType").value,
+    description: document.getElementById("eDesc").value.trim(),
+    severity: document.getElementById("eSev").value,
+    loggedBy: document.getElementById("eBy").value.trim(),
+    time: new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})
+  };
+  if(isNew) rxErrors.push(entry);
+  else { const i=rxErrors.findIndex(x=>x.id===editingErr.id); if(i>=0)rxErrors[i]=entry; }
+  closeErrModal(); renderErrors();
+}
+function deleteErr(id){rxErrors=rxErrors.filter(e=>e.id!==id);closeErrModal();renderErrors();}
+
+function renderErrors(){
+  const day=document.getElementById("errDay")?.value||curDay;
+  const suite=document.getElementById("errSuite")?.value||"All";
+  const rphF=document.getElementById("errRphFilter")?.value||"All";
+
+  // populate RPH filter
+  const rphNames=[...new Set(rxErrors.map(e=>e.rphName).filter(Boolean))];
+  const rphSel=document.getElementById("errRphFilter");
+  if(rphSel){
+    const cur=rphSel.value;
+    rphSel.innerHTML=`<option value="All">All RPH</option>`+rphNames.map(n=>`<option${n===cur?" selected":""}>${n}</option>`).join("");
+  }
+
+  let rows=rxErrors.filter(e=>{
+    if(e.day!==day) return false;
+    if(suite!=="All"&&e.suite!==suite) return false;
+    if(rphF!=="All"&&e.rphName!==rphF) return false;
+    return true;
+  });
+
+  // Summary
+  const sevCounts={Low:0,Medium:0,High:0,Critical:0};
+  rows.forEach(r=>{if(sevCounts[r.severity]!==undefined)sevCounts[r.severity]++;});
+  const rphCounts={};
+  rows.forEach(r=>{rphCounts[r.rphName]=(rphCounts[r.rphName]||0)+1;});
+
+  let sumH=`<div class="summary-card sc-total"><div class="sc-num">${rows.length}</div><div class="sc-lbl">Total Errors</div></div>`;
+  ERROR_SEVERITY.forEach(s=>{
+    if(sevCounts[s]>0){const[bg,col]=SEV_COLORS[s].split("|");sumH+=`<div class="summary-card" style="border-color:${col};color:${col}"><div class="sc-num">${sevCounts[s]}</div><div class="sc-lbl">${s}</div></div>`;}
+  });
+  // Per-RPH mini cards
+  Object.entries(rphCounts).forEach(([name,cnt])=>{
+    sumH+=`<div class="summary-card" style="border-color:#7c3aed;color:#5b21b6;min-width:80px"><div class="sc-num">${cnt}</div><div class="sc-lbl" style="font-size:.55rem">${name}</div></div>`;
+  });
+  document.getElementById("errSummary").innerHTML=sumH;
+
+  // Table
+  const tbody=document.getElementById("errBody");
+  if(!rows.length){
+    tbody.innerHTML=`<tr><td colspan="10" style="text-align:center;color:#c4b5fd;padding:20px;font-style:italic">No verified errors logged for ${day}${suite!=="All"?" – "+suite:""}</td></tr>`;
+    return;
+  }
+  tbody.innerHTML=rows.map(r=>{
+    const[bg,col]=SEV_COLORS[r.severity].split("|");
+    return `<tr>
+      <td style="font-size:.65rem;color:#6b21a8">${r.date}</td>
+      <td><span class="badge ${suiteBadge(r.suite)}">${r.suite}</span></td>
+      <td><strong style="color:#5b21b6">${r.rphName||"—"}</strong></td>
+      <td style="font-family:monospace;color:#3b0764;font-size:.72rem">${r.rxNum||"—"}</td>
+      <td><span class="badge" style="background:#ede9fe;color:#5b21b6">${r.errorType}</span></td>
+      <td style="font-size:.67rem;max-width:200px;color:#3b0764">${r.description||"—"}</td>
+      <td><span style="background:${bg};color:${col};padding:2px 8px;border-radius:8px;font-size:.6rem;font-weight:700">${r.severity}</span></td>
+      <td style="font-size:.65rem;color:#6b21a8">${r.loggedBy||"—"}</td>
+      <td style="font-size:.63rem;color:#9d7bcf">${r.time}</td>
+      <td>
+        <button onclick="openErrModal(${r.id})" style="padding:2px 7px;border-radius:5px;border:none;background:#ede9fe;color:#5b21b6;font-size:.6rem;font-weight:700;cursor:pointer;margin-right:3px">Edit</button>
+        <button onclick="deleteErr(${r.id})" style="padding:2px 7px;border-radius:5px;border:none;background:#fee2e2;color:#991b1b;font-size:.6rem;font-weight:700;cursor:pointer">Del</button>
+      </td>
+    </tr>`;
+  }).join("");
+}
+function toggleFS(){
+  const el=document.documentElement;
+  if(!document.fullscreenElement&&!document.webkitFullscreenElement){
+    const req=el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen||el.msRequestFullscreen;
+    if(req) req.call(el);
+  } else {
+    const ex=document.exitFullscreen||document.webkitExitFullscreen||document.mozCancelFullScreen||document.msExitFullscreen;
+    if(ex) ex.call(document);
+  }
+}
+document.addEventListener("fullscreenchange",()=>{
+  const btn=document.getElementById("fsBtn");
+  if(btn) btn.textContent=document.fullscreenElement?"✕ Exit Fullscreen":"⛶ Fullscreen";
+});
+document.addEventListener("webkitfullscreenchange",()=>{
+  const btn=document.getElementById("fsBtn");
+  if(btn) btn.textContent=document.webkitFullscreenElement?"✕ Exit Fullscreen":"⛶ Fullscreen";
+});
+renderStaffTable();
+</script>
+</body>
+</html>
