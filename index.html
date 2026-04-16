@@ -207,11 +207,11 @@ footer{text-align:center;color:#8b5cf6;font-size:.56rem;padding:5px;border-top:1
     <div class="nav-tab active" id="navStaff"  onclick="switchMain('staff')">👥 Staff</div>
     <div class="nav-tab"        id="navSched"   onclick="switchMain('sched')">📋 Schedule</div>
     <div class="nav-tab"        id="navAttend"  onclick="switchMain('attend')">🚨 Attendance</div>
-    <div class="nav-tab"        id="navErrors"  onclick="switchMain('errors')">⚠️ Rx Errors</div>
   </div>
   <div class="nav-brand">
     <div><div class="bn">gifthealth<sup style="font-size:.45rem">∞</sup></div><div class="bs">Created by Dom</div></div>
     <span class="cloud-dot dot-off" id="cloudDot" title="Cloud status"></span>
+    <span id="lastSaved" style="color:rgba(255,255,255,.6);font-size:.56rem;white-space:nowrap"></span>
     <button class="nav-btn saving" id="saveBtn" onclick="saveToCloud()">☁️ Save</button>
     <button class="nav-btn loading" id="loadBtn" onclick="loadFromCloud()">⬇️ Load</button>
     <button class="nav-btn" onclick="openCloudModal()" title="Cloud Settings">⚙️ Cloud</button>
@@ -261,21 +261,6 @@ footer{text-align:center;color:#8b5cf6;font-size:.56rem;padding:5px;border-top:1
   </div>
 </div>
 
-<!-- RX ERRORS PAGE -->
-<div class="page-wrap" id="errorsPage">
-  <div class="page-body">
-    <div class="staff-toolbar">
-      <h2>⚠️ Verified Rx Errors</h2>
-      <select class="filter-sel" id="errDay" onchange="renderErrors()"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select>
-      <select class="filter-sel" id="errSuite" onchange="renderErrors()"><option value="All">All Suites</option><option>Suite B1</option><option>Suite B2</option><option>Suite C – RO</option></select>
-      <select class="filter-sel" id="errRph" onchange="renderErrors()"><option value="All">All RPH</option></select>
-      <button class="btn-add" onclick="openErrModal(null)">+ Log Error</button>
-    </div>
-    <div id="errSummary" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px"></div>
-    <div style="overflow-x:auto"><table class="staff-table"><thead><tr><th>Date</th><th>Suite</th><th>RPH</th><th>Rx #</th><th>Error Type</th><th>Description</th><th>Severity</th><th>Logged By</th><th>Time</th><th>Actions</th></tr></thead><tbody id="errBody"></tbody></table></div>
-  </div>
-</div>
-
 <!-- SCHEDULE PAGE -->
 <div class="page-wrap" id="schedPage">
   <div class="sub-bar" id="suiteTabs"><span class="sub-bar-label">SUITE:</span></div>
@@ -296,10 +281,6 @@ footer{text-align:center;color:#8b5cf6;font-size:.56rem;padding:5px;border-top:1
 <div class="drop" id="dropEl" style="display:none"></div>
 
 <div class="mbg" id="mainMbg">
-  <div class="modal"><h2 id="mTitle"></h2><div id="mBody"></div></div>
-</div>
-
-<div class="mbg" id="cloudMbg">
   <div class="modal" style="max-width:460px">
     <h2>☁️ Cloud Storage Setup</h2>
     <div class="cloud-setup-box">
@@ -326,11 +307,11 @@ footer{text-align:center;color:#8b5cf6;font-size:.56rem;padding:5px;border-top:1
   </div>
 </div>
 
-<div class="mbg" id="errMbg">
-  <div class="modal"><h2 id="errMTitle"></h2><div id="errMBody"></div></div>
+<div class="mbg" id="mainMbg">
+  <div class="modal"><h2 id="mTitle"></h2><div id="mBody"></div></div>
 </div>
 
-<div id="toast"></div>
+<div class="mbg" id="cloudMbg">
 
 <script>
 // ═══════════════════════════════════════════════════════════════
@@ -461,7 +442,15 @@ function setCloudDot(state){
   d.title=state==="ok"?"Cloud connected":state==="err"?"Cloud error":"Cloud not configured";
 }
 
-function showToast(msg,bg="#3b0764"){
+function updateLastSaved(isoStr){
+  const el=document.getElementById("lastSaved");
+  if(!el)return;
+  if(!isoStr){el.textContent="";return;}
+  const d=new Date(isoStr);
+  const date=d.toLocaleDateString([],{month:"short",day:"numeric"});
+  const time=d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+  el.textContent=`Last saved: ${date} ${time}`;
+}
   const t=document.getElementById("toast");
   t.textContent=msg;t.style.background=bg;t.style.color="#fff";t.style.display="block";t.style.opacity="1";
   clearTimeout(t._timer);
@@ -479,6 +468,8 @@ async function saveToCloud(){
   try{
     const r=await fetch(cloudUrl(),{method:"PUT",headers:cloudHdr(),body:JSON.stringify(buildPayload())});
     if(!r.ok)throw new Error(r.status);
+    const now=new Date().toISOString();
+    updateLastSaved(now);
     setCloudDot("ok");
     showToast("✅ Saved to cloud","#166534");
   }catch(e){
@@ -511,6 +502,7 @@ async function loadFromCloud(){
     // re-init any missing state slots
     initState();
     setCloudDot("ok");
+    updateLastSaved(d.savedAt||null);
     const t=d.savedAt?new Date(d.savedAt).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"";
     showToast(`☁️ Loaded${t?" (saved "+t+")":""}`, "#1e40af");
     renderStaffTable();
@@ -819,14 +811,13 @@ function clearSuite(){Object.values(sched[curDay]?.[curSuite]||{}).forEach(pod=>
 // NAV
 // ═══════════════════════════════════════════════════════════════
 function switchMain(tab){
-  ["staff","sched","attend","errors"].forEach(t=>{
+  ["staff","sched","attend"].forEach(t=>{
     document.getElementById(t+"Page").classList.toggle("active",t===tab);
     document.getElementById("nav"+t.charAt(0).toUpperCase()+t.slice(1)).classList.toggle("active",t===tab);
   });
   if(tab==="sched"){renderSuiteTabs();renderDayTabs();render();}
   else if(tab==="staff")renderStaffTable();
   else if(tab==="attend"){document.getElementById("attendDay").value=curDay;renderAttendance();}
-  else if(tab==="errors"){document.getElementById("errDay").value=curDay;renderErrors();}
 }
 function renderSuiteTabs(){document.getElementById("suiteTabs").innerHTML=`<span class="sub-bar-label">SUITE:</span>`+SUITES.map(s=>`<div class="sub-tab${s===curSuite?" active":""}" onclick="setSuite('${s}')">${s}</div>`).join("");}
 function renderDayTabs(){document.getElementById("dayTabs").innerHTML=`<span class="sub-bar-label">DAY:</span>`+DAYS.map(d=>`<div class="sub-tab${d===curDay?" active":""}" onclick="setDay('${d}')">${d.slice(0,3)}</div>`).join("");}
@@ -953,72 +944,6 @@ function renderCallOffForm(){
 function saveCallOff(){logAttendance(parseInt(document.getElementById("caEmp").value),document.getElementById("caSt").value,document.getElementById("caDay").value,document.getElementById("caSuite").value,document.getElementById("caInfo").value,document.getElementById("caBy").value);closeModal();renderAttendance();}
 
 // ═══════════════════════════════════════════════════════════════
-// RX ERRORS
-// ═══════════════════════════════════════════════════════════════
-let errNextId=1;
-function openErrModal(id){
-  editingErr=id?{...rxErrors.find(e=>e.id===id)}:{id:null,day:curDay,suite:curSuite,rphId:null,rphName:"",rxNum:"",errorType:"Wrong Drug",description:"",severity:"High",loggedBy:"",time:""};
-  renderErrForm();document.getElementById("errMbg").classList.add("open");
-}
-function closeErrModal(){document.getElementById("errMbg").classList.remove("open");editingErr=null;}
-
-function renderErrForm(){
-  const e=editingErr,isNew=!e.id;
-  document.getElementById("errMTitle").textContent=isNew?"Log Verified Rx Error":"Edit Error Log";
-  const rphList=EMPS.filter(x=>(x.eligible||[]).includes("RPH"));
-  const rphH=`<option value="">— Select RPH —</option>`+rphList.map(r=>`<option value="${r.id}"${e.rphId===r.id?" selected":""}>${r.name}</option>`).join("")+`<option value="__manual__"${!e.rphId&&e.rphName?"selected":""}>Enter manually…</option>`;
-  const typeH=ERROR_TYPES.map(t=>`<option${t===e.errorType?" selected":""}>${t}</option>`).join("");
-  const dayH=DAYS.map(d=>`<option${d===e.day?" selected":""}>${d}</option>`).join("");
-  const suiteH=SUITES.map(s=>`<option${s===e.suite?" selected":""}>${s}</option>`).join("");
-  const showM=e.rphId==="__manual__"||(!e.rphId&&e.rphName);
-  document.getElementById("errMBody").innerHTML=`
-    <div style="background:#450a0a;border:1px solid #f87171;border-radius:6px;padding:7px 10px;margin-bottom:10px;font-size:.65rem;color:#fca5a5">⚠️ <strong>Only log errors verified WITHOUT being fixed first.</strong></div>
-    <div class="mrow"><div><label class="ml">Day</label><select class="mi" id="eDy">${dayH}</select></div><div><label class="ml">Suite</label><select class="mi" id="eSu">${suiteH}</select></div></div>
-    <label class="ml">RPH Who Verified Error</label><select class="mi" id="eRph" onchange="onRphSel(this.value)">${rphH}</select>
-    <div id="rphManWrap" style="display:${showM?"block":"none"}"><label class="ml">RPH Name (manual)</label><input class="mi" id="eRphM" value="${showM?e.rphName:""}" placeholder="Enter name"/></div>
-    <div class="mrow"><div><label class="ml">Rx Number</label><input class="mi" id="eRx" value="${e.rxNum}" placeholder="e.g. 1234567"/></div><div><label class="ml">Error Type</label><select class="mi" id="eType">${typeH}</select></div></div>
-    <label class="ml">Severity</label><div style="display:flex;gap:5px;margin-top:3px">${ERROR_SEV.map(s=>{const[bg,col]=SEV_STYLE[s].split("|");return`<button onclick="setErrSev('${s}')" id="sb${s}" style="flex:1;padding:3px;border-radius:5px;border:2px solid ${e.severity===s?col:"transparent"};background:${bg};color:${col};font-size:.63rem;font-weight:700;cursor:pointer">${s}</button>`;}).join("")}</div><input type="hidden" id="eSev" value="${e.severity}"/>
-    <label class="ml">Description</label><textarea class="mi" id="eDesc" rows="3" placeholder="Describe the error…" style="resize:vertical">${e.description}</textarea>
-    <label class="ml">Logged By</label><input class="mi" id="eBy" value="${e.loggedBy}" placeholder="Your name"/>
-    <div class="ma"><button class="mcan" onclick="closeErrModal()">Cancel</button>${!isNew?`<button class="mdel" onclick="delErr(${e.id})">🗑</button>`:""}<button class="msave" onclick="saveErr(${isNew})">💾 Save</button></div>`;
-}
-function onRphSel(v){const w=document.getElementById("rphManWrap");if(w)w.style.display=v==="__manual__"?"block":"none";}
-function setErrSev(s){
-  document.getElementById("eSev").value=s;
-  if(editingErr)editingErr.severity=s;
-  ERROR_SEV.forEach(sv=>{const b=document.getElementById("sb"+sv);if(b){const[bg,col]=SEV_STYLE[sv].split("|");b.style.border=`2px solid ${sv===s?col:"transparent"}`;}});
-}
-function saveErr(isNew){
-  const rphSel=document.getElementById("eRph").value;
-  const rphList=EMPS.filter(x=>(x.eligible||[]).includes("RPH"));
-  let rphId=null,rphName="";
-  if(rphSel==="__manual__"||!rphSel){rphName=document.getElementById("eRphM")?.value?.trim()||"";}
-  else{rphId=parseInt(rphSel);rphName=rphList.find(x=>x.id===rphId)?.name||"";}
-  const entry={id:isNew?errNextId++:editingErr.id,date:new Date().toLocaleDateString(),day:document.getElementById("eDy").value,suite:document.getElementById("eSu").value,rphId,rphName,rxNum:document.getElementById("eRx").value.trim(),errorType:document.getElementById("eType").value,description:document.getElementById("eDesc").value.trim(),severity:document.getElementById("eSev").value,loggedBy:document.getElementById("eBy").value.trim(),time:new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})};
-  if(isNew)rxErrors.push(entry);else{const i=rxErrors.findIndex(x=>x.id===editingErr.id);if(i>=0)rxErrors[i]=entry;}
-  closeErrModal();renderErrors();
-}
-function delErr(id){rxErrors=rxErrors.filter(e=>e.id!==id);closeErrModal();renderErrors();}
-function renderErrors(){
-  const day=document.getElementById("errDay").value;
-  const suiteF=document.getElementById("errSuite").value;
-  const rphF=document.getElementById("errRph").value;
-  const names=[...new Set(rxErrors.map(e=>e.rphName).filter(Boolean))];
-  const rs=document.getElementById("errRph");
-  if(rs){const cv=rs.value;rs.innerHTML=`<option value="All">All RPH</option>`+names.map(n=>`<option${n===cv?" selected":""}>${n}</option>`).join("");}
-  let rows=rxErrors.filter(e=>e.day===day&&(suiteF==="All"||e.suite===suiteF)&&(rphF==="All"||e.rphName===rphF));
-  const sc={Low:0,Medium:0,High:0,Critical:0};rows.forEach(r=>{if(sc[r.severity]!==undefined)sc[r.severity]++;});
-  const rc={};rows.forEach(r=>{rc[r.rphName]=(rc[r.rphName]||0)+1;});
-  let sumH=`<div class="summary-card sc-total"><div class="sc-num">${rows.length}</div><div class="sc-lbl">Total Errors</div></div>`;
-  ERROR_SEV.forEach(s=>{if(sc[s]>0){const[bg,col]=SEV_STYLE[s].split("|");sumH+=`<div class="summary-card" style="border-color:${col};color:${col}"><div class="sc-num">${sc[s]}</div><div class="sc-lbl">${s}</div></div>`;}});
-  Object.entries(rc).forEach(([n,c])=>{sumH+=`<div class="summary-card sc-total" style="min-width:70px"><div class="sc-num">${c}</div><div class="sc-lbl" style="font-size:.52rem">${n}</div></div>`;});
-  document.getElementById("errSummary").innerHTML=sumH;
-  const tbody=document.getElementById("errBody");
-  if(!rows.length){tbody.innerHTML=`<tr><td colspan="10" style="text-align:center;color:#c4b5fd;padding:16px;font-style:italic">No verified errors for ${day}</td></tr>`;return;}
-  tbody.innerHTML=rows.map(r=>{const[bg,col]=SEV_STYLE[r.severity].split("|");return`<tr><td style="font-size:.61rem;color:#6b21a8">${r.date}</td><td><span class="badge ${suiteBadge(r.suite)}">${r.suite}</span></td><td><strong style="color:#5b21b6">${r.rphName||"—"}</strong></td><td style="font-family:monospace;color:#3b0764;font-size:.68rem">${r.rxNum||"—"}</td><td><span class="badge" style="background:#ede9fe;color:#5b21b6">${r.errorType}</span></td><td style="font-size:.63rem;max-width:180px;color:#3b0764">${r.description||"—"}</td><td><span style="background:${bg};color:${col};padding:2px 7px;border-radius:7px;font-size:.58rem;font-weight:700">${r.severity}</span></td><td style="font-size:.61rem;color:#6b21a8">${r.loggedBy||"—"}</td><td style="font-size:.59rem;color:#9d7bcf">${r.time}</td><td><button onclick="openErrModal(${r.id})" style="padding:2px 6px;border-radius:4px;border:none;background:#ede9fe;color:#5b21b6;font-size:.58rem;cursor:pointer;margin-right:2px">Edit</button><button onclick="delErr(${r.id})" style="padding:2px 6px;border-radius:4px;border:none;background:#fee2e2;color:#991b1b;font-size:.58rem;cursor:pointer">Del</button></td></tr>`;}).join("");
-}
-
-// ═══════════════════════════════════════════════════════════════
 // FULLSCREEN
 // ═══════════════════════════════════════════════════════════════
 function toggleFS(){const el=document.documentElement;if(!document.fullscreenElement&&!document.webkitFullscreenElement){(el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen||el.msRequestFullscreen||function(){}).call(el);}else{(document.exitFullscreen||document.webkitExitFullscreen||document.mozCancelFullScreen||document.msExitFullscreen||function(){}).call(document);}}
@@ -1031,7 +956,6 @@ document.addEventListener("click",closeDrop);
 document.getElementById("dropEl").addEventListener("click",e=>e.stopPropagation());
 document.getElementById("mainMbg").addEventListener("click",e=>{if(e.target===e.currentTarget)closeModal();});
 document.getElementById("cloudMbg").addEventListener("click",e=>{if(e.target===e.currentTarget)closeCloudModal();});
-document.getElementById("errMbg").addEventListener("click",e=>{if(e.target===e.currentTarget)closeErrModal();});
 
 renderStaffTable();
 </script>
